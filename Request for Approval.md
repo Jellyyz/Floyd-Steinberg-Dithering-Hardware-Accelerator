@@ -22,10 +22,10 @@ We will use an FPGA to implement our solution because FPGAs can stand in place f
 
 Explain what the subsystem does.  Explicitly list what sensors/components you will use in this subsystem.  Include part numbers.
 
-- As image data as input, it will process the data to a black and white image via the digital halftoning algorithm.
+- As image data as input, it will process the data to a black and white image.
 - ALTERA MAX10 Development & Education Board (DE10-Lite) (i.e., from ECE 385)
 - DE10-Lite Shield
-- Thermal Receipt Printer Guts (https://www.mouser.com/datasheet/2/737/mini_thermal_receipt_printer-2488648.pdf)to print images on to receipts
+- Thermal Receipt Printer Guts (https://www.mouser.com/datasheet/2/737/mini_thermal_receipt_printer-2488648.pdf) to print images on to receipts. Since it's the guts of a printer, we will be making a secure enclosure for it.
 
 ## WiFi Subsystem
 
@@ -36,13 +36,15 @@ Explain what the subsystem does.  Explicitly list what sensors/components you wi
 
 ## Sensor / Actuator Subsystem
 
-- It will output printer status and data to an LCD. 
+- It will output printer battery, file to print, and other diagnostic data to an LCD. 
 - HD44780 LCD (https://www.sparkfun.com/datasheets/LCD/HD44780.pdf)
+- Buttons that decide what imaging algorithm to use when processing images.
 
 ## Power Subsystem
 
 - Supplies power to the thermal printer.
-- Printer requires 7.5V-9V DC for clear printing, 1.5A 
+- Printer requires 7.5V-9V DC for clear printing, 1.5A.
+- If the printer is not executing, the system should not be on.
 
 
 # Criterion For Success
