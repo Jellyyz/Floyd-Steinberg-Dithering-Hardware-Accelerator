@@ -18,21 +18,24 @@ We will use an FPGA to implement our solution because FPGAs can stand in place f
 
 # Solution Components
 
-## Processing Subsystem
+## Imaging Subsystem
 
 Explain what the subsystem does.  Explicitly list what sensors/components you will use in this subsystem.  Include part numbers.
 
 - As image data as input, it will process the data to a black and white image via the digital halftoning algorithm.
 - ALTERA MAX10 Development & Education Board (DE10-Lite) (i.e., from ECE 385)
 - DE10-Lite Shield
+- Thermal Receipt Printer Guts (https://www.mouser.com/datasheet/2/737/mini_thermal_receipt_printer-2488648.pdf), powered by battery packs, to print images on to receipts
 
-## Wireless Subsystem
+## WiFi Subsystem
 
-- ___ Microcontroller with ESP8266(?) WiFi module
+- ___ MCU with ESP8266(?) WiFi module
 
-## Sensor Subsystem
+If we manage to achieve the above:
 
-- 
+## Sensor / Actuator Subsystem
+
+- HD44780 LCD (https://www.sparkfun.com/datasheets/LCD/HD44780.pdf) to display printer data / status
 
 # Criterion For Success
 
@@ -42,3 +45,6 @@ Describe high-level goals that your project needs to achieve to be effective.  T
 2. We need to make sure that the device is able to process data on its own through its hardware. We shall implement an algorithm suggested to us by HP (half toning algorithm) on an FPGA. 
 3. The printed image must be the same as the image sent to the wireless subsystem except black and white and fitted on receipt paper.
 4. We need to use small printers.
+
+
+1. We need to make sure that the device design is portable, in that it is able to receive data through WiFi and is battery powered. 
