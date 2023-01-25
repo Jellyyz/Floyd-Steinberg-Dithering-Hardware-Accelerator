@@ -32,6 +32,10 @@ Explain what the subsystem does.  Explicitly list what sensors/components you wi
 - Communicate between our system and another device via WiFi.
 - ESP8266 SMT Module - ESP-12F WiFi module (https://www.adafruit.com/product/2491)
 
+## Diagnostic Subsystem
+
+- LEDs that indicate success or failure of the printing and imaging process.
+
 ### If we manage to achieve the above, the following will be added to the system:
 
 ## Sensor / Actuator Subsystem
