@@ -4,7 +4,7 @@
 Team Members:
 - Gally Huang (ghuang23)
 - Jason Liu (jliu246)
-- Student 3 (netid)
+- Kevin An (kqan2)
 
 # Problem
 
@@ -28,15 +28,17 @@ Explain what the subsystem does.  Explicitly list what sensors/components you wi
 
 ## Wireless Subsystem
 
-- ___ Microcontroller
+- ___ Microcontroller with ESP8266(?) WiFi module
 
 ## Sensor Subsystem
+
+- 
 
 # Criterion For Success
 
 Describe high-level goals that your project needs to achieve to be effective.  These goals need to be clearly testable and not subjective.
 
 1. We need to make sure that the device is able to receive data through portable methods - in this case, through WiFi. 
-2. We need to make sure that the device is able to process data on its own through its hardware. We shall implement an algorithm suggested to us by HP (insert half toning algorithm) on an FPGA. 
+2. We need to make sure that the device is able to process data on its own through its hardware. We shall implement an algorithm suggested to us by HP (half toning algorithm) on an FPGA. 
 3. The printed image must be the same as the image sent to the wireless subsystem except black and white and fitted on receipt paper.
 4. We need to use small printers.
