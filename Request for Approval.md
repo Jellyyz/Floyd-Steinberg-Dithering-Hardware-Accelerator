@@ -30,7 +30,7 @@ Explain what the subsystem does.  Explicitly list what sensors/components you wi
 ## WiFi Subsystem
 
 - Communicate between our system and another device via WiFi.
-- ___ MCU with ESP8266(?) WiFi module
+- ESP8266 SMT Module - ESP-12F WiFi module (https://www.adafruit.com/product/2491)
 
 ### If we manage to achieve the above, the following will be added to the system:
 
