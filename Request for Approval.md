@@ -3,12 +3,12 @@
 
 Team Members:
 - Gally Huang (ghuang23)
-- Jason Liu (jliu246)
+- Jason Liu (jliu246)image.pngimage.png
 - Kevin An (kqan2)
 
 # Problem
 
-In such a modern world with many other products such as smartphones and the internet, the printer has remained relatively unchanged over the course of the last century. After electronics were invented, the art of printing was modernized in a way that allowed printing with electricity. In order to stay competitive, Hewlett Packard Inc. (HP) has set out a pitch for us to attempt to discover a way to make printing portable in order to keep their high market share over the printing market. Competitors such as Canon Inc. have already begun the process of creating such portable printers in the Asian markets and this will allow us to design and create smaller printers in the NA market. 
+In such a modern world with many other products such as smartphones and the internet, the printer has remained relatively unchanged over the course of the last century. After electronics were invented, the art of printing was modernized in a way that allowed printing with electricity. In order to stay competitive, Hewlett Packard Inc. (HP) has set out a pitch for us to attempt to discover a way to make printing portable in order to keep their high market share over the printing market. Competitors such as Canon Inc. have already begun the process of creating such portable printers in the Asian markets and this will allow us to design and create smaller printers in the North American market. 
 
 # Solution
 
@@ -58,4 +58,4 @@ The FPGA from ECE 385 will be utilized as the base of the project. We will be cr
 1. We need to make sure that the device is able to process data on its own through its hardware. We shall implement algorithms suggested to us by HP (e.g., Floyd-Steinberg dithering algorithm) on an FPGA. 
 2. The printed image must be the same as the image sent to the wireless subsystem except in black and white and fitted on receipt paper.
 3. We need to use small printers.
-4. We need to make sure that the device design is portable, in that it is able to receive data through WiFi and is battery-powered. 
+4. We need to make sure that the device design is portable, such that it is able to receive data through WiFi and is battery-powered. 
