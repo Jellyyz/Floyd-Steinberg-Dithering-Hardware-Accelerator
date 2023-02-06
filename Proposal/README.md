@@ -13,9 +13,7 @@ We are team 29, with the assistance of TA (<!-- UNKNOWN NAME???? -->)
 
 ### Goals and Benefits
 - Make printing portable in the world where many other technology have already evolved to become more portable. <!-- Goals -->
-
 - Current solutions using wireless connection usually support Bluetooth, which is short-range, or are expensive. <!-- Features -->
-
 - The project allows for printing with a battery system and wireless uploading of image data, making it very portable. <!-- Functions / Benefits -->
 
 ### High Level Requirements <!-- 2/3 sentences: max of 3 sentences -->
