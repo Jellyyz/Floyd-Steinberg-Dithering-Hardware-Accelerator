@@ -55,3 +55,24 @@ The MCU will require 12 mA of current and anywhere between 3-3.3V continuously f
 ### Risk Analysis
 
 Servers are considered outside the scope of this class, so it may be difficult to implement. Additionally, based on our implementation of accepting data from a user, we can have our local server (and hence, our local device) be susceptible to a cyber attack. Using JavaScript makes us potentially vulnerable to some control flow hijacking, which can allow users to attack our device. Since our code is online, attackers can try to precisely send images to hijack the server.
+
+### Image Processing Subsystem
+##### Image Proocessing Subsystem Overview:
+
+This subsystem allows for a three pixels to be converted and mapped into the dithered equivalent after being processed. The processing is done entirely by hardware as this is the "hardware accelerator" portion of our project and this will allow for the images to be printed out at an incredible rate in a very similar fashion to how it is done in industry with consumer grade printers @ HP. 
+
+
+##### Subsystem Requirements:
+
+A Delite-10 FPGA will be utilized to simulate the operation of an ASIC which is not openly avaliable to the mass public. FPGAs are commonly used to test HDL code at a very cheap cost compared to a full scale tape out - albeit at a slower clock, so we will attempt to multiply our hardware throughput at the correct porportional speedup rate. The de-lite 10 can run at a speed of 50mhz, while mainstream ASICs can usually run 10 - 50x faster than this, but this still will be much faster than processing the image through software means (on the cloud or on the MCU). 
+
+The fpga will take in 3 pixels and run it through a pipeline. Firstly the fpga must store all of the RGB values of an image into its on board memory in order to prepare it to processed. In this case, while the pixels are being stored into memory, we can start processing some of the data while it is still in the process of gathering data from the microcontroller. This is because many of the algorithms that will be applied such as Floyd-Steinberg dithering only requires 5 adjacent pixels for the image to start being processed. We need to set up a state machine that detects whenever a threshold amount of pixels have been loaded into the fpga and it will start to process this data simultanously. The third stage of the pipeline is when the data needs to be stored in a final bitmapped processed stage and then this final image will be sent back out into the microcontroller/wifi submodule and it will be ready for printing. This process happens super fast, and doing the math it should not take more than 3(pipeline stages) * (x * y) = 3xy, where x and y are the dimensions of the picture,  clock cycles in order to process a single image. 
+
+Diagram:
+![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal/fpga_image_processing.drawio.png)
+
+# Ethics and Safety
+
+We believe that this design is quite safe since most of the components are found in everyday objects such as a phone and other consumer grade products. However, we take some ideas from prior consumer failures, such as the samsung s7 battery that exploded and imploded on itself due to a manufactoring defect. 
+
+We should be testing the battery throughly in order to ensure that it is not causing for any power overages to occur as well as any harm to the user. This includes setting up battery current limitations as well as limitations on how much the battery can charge. By limiting the amount of things that the battery can do, this will in turn cause for the most voltile part of the system to be the most safe. 
