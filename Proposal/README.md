@@ -3,7 +3,7 @@
 
 Our senior design project name is **Portable Thermal Printer** for ECE 445 Spring 2023.
 
-We are team 29, with the assistance of TA (<!-- UNKNOWN NAME???? -->)
+We are team 29, with the assistance of TA Shao Hanyin (hanyins)
 - Gally Huang
 - Jason Liu
 - Kevin An
@@ -16,7 +16,7 @@ We are team 29, with the assistance of TA (<!-- UNKNOWN NAME???? -->)
 - Current solutions using wireless connection usually support Bluetooth, which is short-range, or are expensive. <!-- Features -->
 - The project allows for printing with a battery system and wireless uploading of image data, making it very portable. <!-- Functions / Benefits -->
 
-### High Level Requirements <!-- 2/3 sentences: max of 3 sentences -->
+### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
 
 - The device is able to process data correctly on its own through its hardware.
 - The device design is portable, in that it is able to receive data through WiFi, is battery-powered, and is small.
@@ -26,8 +26,7 @@ We are team 29, with the assistance of TA (<!-- UNKNOWN NAME???? -->)
 # Design
 
 ## Block Diagram
-
-### Visual Representation
+![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal/445_proposal.drawio.png)
 
 ### Description
 
