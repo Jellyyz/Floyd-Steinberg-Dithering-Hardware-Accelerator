@@ -18,8 +18,8 @@ We are team 29, with the assistance of TA Shao Hanyin (hanyins)
 
 ### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
 
-- The device is able to process data correctly on its own through its hardware. 
-- The device design is portable. It should be able to wirelessly and accurately get the user uploaded image data from a server to the embedded microcontroller. The device itself should also be completely powered by batteries, having an average battery life of ideally 2 or more hours. Last, it should sit as a small package, able to fit entirely in someone's hand for convenience.
+- The device design is portable. It should be able to wirelessly and accurately get the user uploaded image data from a server to the embedded microcontroller. The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally 1.5 or more hours. Last, it should sit as a small package, able to fit entirely in someone's hand for convenience.
+- After the microcontroller passes the data to the FPGA via SPI, we will perform verification (ie. scoreboarding and assertion checking) to ensure that the data within the buffer is valid at the start, as well as guaranteeing that the output data matches the expected output from the performed algorithms.
 - The device properly prints an image on to paper after it has processed the received data.
 
 
