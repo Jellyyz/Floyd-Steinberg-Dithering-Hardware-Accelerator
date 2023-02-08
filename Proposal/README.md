@@ -18,9 +18,9 @@ We are team 29, with the assistance of TA Shao Hanyin (hanyins)
 
 ### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
 
-- The device design is portable. It should be able to wirelessly and accurately get the user uploaded image data from a server to the embedded microcontroller. The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally 1.5 or more hours. Last, it should sit as a small package, able to fit entirely in someone's hand for convenience.
-- After the microcontroller passes the data to the FPGA via SPI, we will perform verification (ie. scoreboarding and assertion checking) to ensure that the data within the buffer is valid at the start, as well as guaranteeing that the output data matches the expected output from the performed algorithms.
-- The device properly prints an image on to paper after it has processed the received data.
+- The device design is portable. It should be able to wirelessly and accurately get the user uploaded image data from a server to the embedded microcontroller. The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally 1.5 or more hours. Last, it should sit as a small footprint of dimensions at most 4inx8in, able to fit entirely in someone's hand for convenience and ease of carrying.
+- When the data is processed by the FPGA, we expect to see considerable tradeoffs in runtime as opposed to performing the image processing algorithms sequentially using the microcontroller alone. We will compare runtimes in implementations between traditional means on the microcontroller (where the algorithms have quadratic runtime scaling), and the hardware accelerated version on the FPGA to demonstrate the boost in performance throughout the entire process time. The end to end time, between user upload to completing the printing, should be within 15 seconds so as to not consume too much time for the user. 
+- The printer itself needs to operate at over 150 degrees Fahrenheit in order to activate the thermal paper, and therefore we must ensure, for the safety of the device for the user, that the specific area intended to be held by the user remains under 120 degrees Fahrenheit throughout operation. The reason for 120 degrees Fahrenheit is because this is generally agreed upon for handheld products as the upper limit of a safe-to-touch temperature, and it would be extremely detrimental if the device were to cause harm by exceeding this rating.
 
 
 # Design
