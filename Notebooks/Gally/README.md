@@ -22,3 +22,10 @@ I meet with a TA who discusses the feasibility of this project and the requireme
 
 I start work on the brainstorming of how the entire system works. The block diagram 1st draft is finished and HDL code is being brainstormed as well. 
 
+
+# Feb 7
+
+We as a group met with the TA and she gave us some requirements for our project as well as promising to give us an FPGA.
+
+# Feb 9
+We as a group met to finish up the proposal.
