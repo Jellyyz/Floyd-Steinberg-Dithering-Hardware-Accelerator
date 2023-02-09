@@ -10,13 +10,27 @@ We are team 29, with the assistance of TA Shao Hanyin (hanyins)
 
 
 ## Objectives and Background
+### Introduction
+#### Problem:
+One of the biggest problems surrounding frequent travellers is the issue of portability. Items that are carried along cannot weigh too much, consume too much space, and compromise on quality. A target area that has been identified by Hewlett Packard Inc. (HP) lies within the commercial printer industry. Printers as a whole have remained relatively unchanged over time with respect to other technologies that have shifted towards more portable means, and still remains an inconvenience for travellers who need to print items while 
+, and HP has identified a potential entry into the portable printer market. 
+ 
+#### Solution:
 
-### Goals and Benefits
+Our solution is a portable thermal printer, a system that receives wireless instructions for printing on receipt paper. Users will be able to upload images from their phones or computer that this system can fetch and print.
+
+We will use an FPGA to implement our solution because they can stand in place for a real-world ASIC and eventually be developed in an ASIC. It will be utilized as the base of the project. Additionally, we need to have a way to print, so we will be using the internals of a thermal printer. Finally, we will be creating our own IO shield for the PCB that has the subsystems listed further down on top of it. 
+
+#### Visual Aid:
+## Block Diagram
+![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal445_pictorial.drawio.png)
+
+#### Goals and Benefits
 - Make printing portable in the world where many other technology have already evolved to become more portable. <!-- Goals -->
 - Current solutions using wireless connection usually support Bluetooth, which is short-range, or are expensive. <!-- Features -->
 - The project allows for printing with a battery system and wireless uploading of image data, making it very portable. <!-- Functions / Benefits -->
 
-### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
+#### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
 
 - The device design is portable. It should be able to wirelessly and accurately get the user uploaded image data from a server to the embedded microcontroller. The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally 1.5 or more hours. Last, it should sit as a small footprint of dimensions at most 4inx8in, able to fit entirely in someone's hand for convenience and ease of carrying.
 - When the data is processed by the FPGA, we expect to see considerable tradeoffs in runtime as opposed to performing the image processing algorithms sequentially using the microcontroller alone. We will compare runtimes in implementations between traditional means on the microcontroller (where the algorithms have quadratic runtime scaling), and the hardware accelerated version on the FPGA to demonstrate the boost in performance throughout the entire process time. The end to end time, between user upload to completing the printing, should be within 15 seconds so as to not consume too much time for the user. 
@@ -81,7 +95,7 @@ There will be an infrared receiver sensor that will sense if there is still a su
 
 Finally, there will be a switchbox that the user can use. Switches, when turned on and off, will change what algorithm the FPGA will use when processing the image (e.g., Floyd-Steinberg Dithering).
 ##### Board Subsystem Requirements:
-The 
+The LCD must be able to
 
 ### Power Subsystem
 ##### Power Subsystem Overview:
