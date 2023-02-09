@@ -39,7 +39,7 @@ We will use a field-programmable gate array (an FPGA) to implement our solution 
 
 - The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally $1.5 \text{ or more hours}$. 
 
-- The start to end time, between user upload and completing the printing, should be within $\text{~}20 \text{ seconds}$ so as to not consume too much time for the user. 
+- The start to end time, between user upload and completing the printing, should be within $\sim20 \text{ seconds}$ so as to not consume too much time for the user. 
 
 
 # Design
