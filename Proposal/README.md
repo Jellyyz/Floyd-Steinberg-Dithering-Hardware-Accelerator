@@ -37,7 +37,7 @@ The purpose of the WiFi subsystem is for the system to wirelessly connect betwee
 
 There will be a simple webpage backed by the server that a user can interface with and upload an image to, and upon which the user can request a connected printer to print the uploaded image. The server will send data to the microcontroller through a wifi connection between the microcontroller to the server, in which the microcontroller further processes the data upon receiving it.
 
-##### Subsystem Requirements:
+##### WiFi Subsystem Requirements:
 
 ESP8266 Microcontroller: This low cost MCU will be embedded on the custom PCB (we will design this as an IO Shield for the system’s FPGA). With respect to the wireless functionality, it is responsible for allowing the printer system itself to stay wireless, as it has a built-in WiFi microchip enabling simple connection to an application server (discussed below). With the MCU acting as a client to an application server, it can create something such as HTTP requests and receive data from the application that users can upload an image to (can be programmed to perform requests at certain intervals, manual button press, etc.).  
 
@@ -62,7 +62,7 @@ Servers are considered outside the scope of this class, so it may be difficult t
 This subsystem allows for a three pixels to be converted and mapped into the dithered equivalent after being processed. The processing is done entirely by hardware as this is the "hardware accelerator" portion of our project and this will allow for the images to be printed out at an incredible rate in a very similar fashion to how it is done in industry with consumer grade printers @ HP. 
 
 
-##### Subsystem Requirements:
+##### Image Processing Subsystem Requirements:
 
 A Delite-10 FPGA will be utilized to simulate the operation of an ASIC which is not openly avaliable to the mass public. FPGAs are commonly used to test HDL code at a very cheap cost compared to a full scale tape out - albeit at a slower clock, so we will attempt to multiply our hardware throughput at the correct porportional speedup rate. The de-lite 10 can run at a speed of 50mhz, while mainstream ASICs can usually run 10 - 50x faster than this, but this still will be much faster than processing the image through software means (on the cloud or on the MCU). 
 
@@ -70,6 +70,29 @@ The fpga will take in 3 pixels and run it through a pipeline. Firstly the fpga m
 
 Diagram:
 ![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal/fpga_image_processing.drawio.png)
+
+### Board Subsystem
+##### Board Subsystem Overview:
+The board subsystem is the interactive and diagnostic block that allows for the user to check the status of the entire system at a glance.
+
+The components are a small 1.8" raw TFT display that displays information about the battery level and the status of a printing job.
+
+There will be an infrared receiver sensor that will sense if there is still a supply of receipt paper for the thermal printer to print on. This information will be sent to the MCU, which will program the LCD to print out a warning or error.
+
+Finally, there will be a switchbox that the user can use. Switches, when turned on and off, will change what algorithm the FPGA will use when processing the image (e.g., Floyd-Steinberg Dithering).
+##### Board Subsystem Requirements:
+The 
+
+### Power Subsystem
+##### Power Subsystem Overview:
+The power subsystem supplies power to every other subsystem. Namely, it powers components such as the ESP8266 MCU (3-3.3V), the thermal printer (5-9V), the FPGA (5V), the LCD (3.3V), and the infrared sensor (3-5V). Its components are a USB-C controller that will be connected to a PC's USB-C port. This connection will supply power to our four 18650 batteries. We use a regulator system to maintain constant voltage levels to the components stated above. It will also flash the MCU (send program information to the MCU to execute).
+
+This subsystem as a whole is necessary for the operations of displaying constant diagnostic information, the Wireless Subsystem receiving image data, processing image data, and printing an image.
+
+##### Power Subsystem Requirements:
+The other subsystems must be powered on with this subsystem at the stated voltage and current levels or with a maximum of -5% deviation.
+
+We also must be able to check the current battery level percent of the 18650 batteries on the LCD in the Board Subsystem.
 
 # Ethics and Safety
 
