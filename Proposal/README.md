@@ -123,7 +123,7 @@ This subsystem as a whole is necessary for the operations of displaying constant
 
 - The other subsystems must be powered on with this subsystem at the stated voltage and current levels or with a maximum of $-5$% deviation.
 
-- It is important that the power system is able to supply the upper conservative limit of $45 \text{ W}$ as well, since this is the 
+- It is important that the power system is able to supply the upper conservative limit of $45 \text{ W}$ as well, since this would be able to provide enough power to the system in the case of sub components requiring peak power. 
 - We also must be able to check the current battery level percent of the 18650 batteries on the LCD in the Board Subsystem.
 
 ### Risk / Tolerance Analysis
