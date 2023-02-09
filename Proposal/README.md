@@ -141,7 +141,7 @@ Therefore, we should be testing the battery throughly in order to ensure that it
 
 # References
 
-<a name="1"></a>[1] <em>IEEE Policies, Section 7 - Professional Activities (Part A - IEEE Policies)</em>, IEEE Code of Ethics 2020
+<a name="1"></a>[1] <em>IEEE Policies, Section 7 - Professional Activities (Part A - IEEE Policies)</em>, IEEE Code of Ethics 2020.
 
 <a name="2"></a>[2] Expressif Systems, "ESP8266EX Datasheet," 2015. Accessed: Feb. 07, 2023. [Online]. Available: [Link](https://cdn-shop.adafruit.com/product-files/2471/0A-ESP8266__Datasheet__EN_v4.3.pdf)
 
@@ -153,10 +153,10 @@ Therefore, we should be testing the battery throughly in order to ensure that it
 
 <a name="6"></a>[6] justinkraaijenbrink, "Exploiting the Floyd-Steinberg Algorithm for Image Dithering in R," Medium, Jan. 30, 2021. [Link](https://medium.com/analytics-vidhya/exploiting-the-floyd-steinberg-algorithm-for-image-dithering-in-r-c19c8008fc99) (accessed Feb. 09, 2023).
 
-<a name="7"></a>[7] Terasic, “DE10-Lite User Manual,” Jun. 05, 2020.
+<a name="7"></a>[7] Terasic, "DE10-Lite User Manual," Jun. 05, 2020.
 
-<a name="8"></a>[8] R. Rox, “Samsung Galaxy S7 explodes during charge,” Notebookcheck, Sep. 03, 2017. [Link](https://www.notebookcheck.net/Samsung-Galaxy-S7-explodes-during-charge.246242.0.html) (accessed Feb. 08, 2023).
+<a name="8"></a>[8] R. Rox, "Samsung Galaxy S7 explodes during charge," Notebookcheck, Sep. 03, 2017. [Link](https://www.notebookcheck.net/Samsung-Galaxy-S7-explodes-during-charge.246242.0.html) (accessed Feb. 08, 2023).
 
-<a name="9"></a>[9] Johns Manville, “Too Hot to Handle?,” www.jm.com, Feb. 25, 2015. [Link](https://www.jm.com/en/blog/2015/february/too-hot-to-handle/) (accessed Feb. 08, 2023).
+<a name="9"></a>[9] Johns Manville, "Too Hot to Handle?," www.jm.com, Feb. 25, 2015. [Link](https://www.jm.com/en/blog/2015/february/too-hot-to-handle/) (accessed Feb. 08, 2023).
 
-<a name="10"></a>[10] Vishay Semiconductors, “TSOP382.., TSOP384.., TSOP392.., TSOP394..,” Feb. 2011. Accessed: Feb. 09, 2023. [Online]. Available: [Link](https://cdn-shop.adafruit.com/datasheets/tsop382.pdf)
+<a name="10"></a>[10] Vishay Semiconductors, "TSOP382.., TSOP384.., TSOP392.., TSOP394..," Feb. 2011. Accessed: Feb. 09, 2023. [Online]. Available: [Link](https://cdn-shop.adafruit.com/datasheets/tsop382.pdf)
