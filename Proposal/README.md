@@ -4,7 +4,7 @@
 
 Our senior design project name is **Portable Thermal Printer** for ECE 445 Spring 2023.
 
-We are team 29, with the assistance of TA Shao Hanyin (hanyins)
+We are Team 29, with the assistance of TA Shao Hanyin (hanyins)
 - Gally Huang
 - Jason Liu
 - Kevin An
@@ -137,4 +137,4 @@ We should be testing the battery throughly in order to ensure that it is not cau
 # References
 
 [1] <em>IEEE Policies, Section 7 - Professional Activities (Part A - IEEE Policies)</em>, IEEE Code of Ethics 2020
-[2] Expressif Systems, "ESP8266EX Datasheet", 2015. Accessed: Feb. 07, 2023. [Online]. Available: https://cdn-shop.adafruit.com/product-files/2471/0A-ESP8266__Datasheet__EN_v4.3.pdf
+[2] <em>Expressif Systems, "ESP8266EX Datasheet", 2015. Accessed: Feb. 07, 2023. [Online]. Available: https://cdn-shop.adafruit.com/product-files/2471/0A-ESP8266__Datasheet__EN_v4.3.pdf </em>
