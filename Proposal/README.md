@@ -117,14 +117,15 @@ Finally, there will be a switchbox that the user can use. Switches, when turned 
 
 The power subsystem supplies power to every other subsystem. Namely, it powers components such as the ESP8266 MCU at $3 \text{-} 3.3 \text{ V}$ [[2](#2)], the thermal printer at $5 \text{-}9 \text{ V}$ [[3](#3)], the FPGA at $5 \text{ V}$ [[7](#7)], the LCD at $3.3 \text{ V}$ [[4](#4)], and the infrared sensor at $3\text{-}5 \text{ V}$ [[10](#10)]. Its components are a USB-C controller that will be connected to a PC's USB-C port. This connection will supply power to our four 18650 batteries. We use a regulator system to maintain constant voltage levels to the components stated above. It will also flash the MCU (send program information to the MCU to execute).
 
-This subsystem as a whole is necessary for the operations of displaying constant diagnostic information, the Wireless Subsystem receiving image data, processing image data, and printing an image.
+This subsystem as a whole is necessary for supporting the continued operations of the entire system, which includes displaying the diagnostic information, the Wireless Subsystem receiving image data, processing image data, and printing.
 
 ##### Power Subsystem Requirements:
 
 - The other subsystems must be powered on with this subsystem at the stated voltage and current levels or with a maximum of $-5$% deviation.
 
 - It is important that the power system is able to supply the upper conservative limit of $45 \text{ W}$ as well, since this would be able to provide enough power to the system in the case of sub components requiring peak power. 
-- We also must be able to check the current battery level percent of the 18650 batteries on the LCD in the Board Subsystem.
+
+- We also must be able to check the current battery level percent of the 18650 batteries on the LCD in the Board Subsystem. This diagnostic data is to be delivered to the Board Subsystem for displaying to the user.
 
 ### Risk / Tolerance Analysis
 
