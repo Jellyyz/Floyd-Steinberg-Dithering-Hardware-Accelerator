@@ -35,11 +35,11 @@ We will use a field-programmable gate array (an FPGA) to implement our solution 
 
 #### High Level Requirements <!-- 3/3 sentences: max of 3 sentences -->
 
-- The device design is portable. It should be able to wirelessly and accurately get the user-uploaded image data from a server to the embedded MCU. It should sit as a small footprint of at most $12\text{"x}12\text{"}$ as to fit comfortably within a suitcase, allowing for ease of transportation. 
+- The device design is portable. It should be able to wirelessly and accurately get the user-uploaded image data from a server to the embedded MCU. It should sit as a small footprint of at most 12"x12" as to fit comfortably within a suitcase, allowing for ease of transportation. 
 
-- The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally $1.5 \text{ or more hours}$. 
+- The device itself should also be completely powered by batteries, having an average (if not worst case) battery life of ideally 1.5 or more hours.
 
-- The start to end time, between user upload and completing the printing, should be within $\sim20 \text{ seconds}$ so as to not consume too much time for the user. 
+- The start to end time, between user upload and completing the printing, should be within 20 seconds so as to not consume too much time for the user. 
 
 
 # Design
@@ -70,7 +70,7 @@ Application server: <br>
 
 - As mentioned previously, the server can be hosted locally for the scope of this project as-is, especially as a means of saving a consistent amount of money as opposed to hosting on a commercial  cloud platform such as AWS or GCP. For large scale implementation, we of course cannot rely on local servers, but this simplifies our testing requirements with a small sample set of users and devices to work with.
 
-- The MCU will require $12 \text{ mA}$ of current and anywhere between $3 \text{-}3.3 \text{ V}$ continuously for operation [[2](#2)], defined in the Power Subsystem how it will be delivered. The local server, being hosted a computer, will require power delivered through a commercial power adapter supply (i.e., laptop being powered by a laptop charger), however, we allow this to be hidden from view for the user. 
+- The MCU will require 12 mA of current and anywhere between 3-3.3V continuously for operation [[2](#2)], defined in the Power Subsystem how it will be delivered. The local server, being hosted a computer, will require power delivered through a commercial power adapter supply (i.e., laptop being powered by a laptop charger), however, we allow this to be hidden from view for the user. 
 
 
 ### Imaging Subsystem
@@ -81,11 +81,11 @@ The Imaging Subsystem allows for three pixels to be converted and mapped into th
 ##### Imaging Processing Subsystem Requirements:
 
 DE10-Lite FPGA:<br>
-- An FPGA will be utilized to simulate the operation of an ASIC which is not openly available to the mass public. FPGAs are commonly used to test HDL code at a very cheap cost compared to a full scale tape out, albeit at a slower clock, so we will attempt to multiply our hardware throughput at the correct proportional speedup rate. The FPGA can run at a speed of $50 \text{ MHz}$ [[7](#7)], while mainstream ASICs can usually run $10\text{-}50\text{x}$ faster than this, but this will still be much faster than processing the image through software means (on the cloud or on the MCU). 
+- An FPGA will be utilized to simulate the operation of an ASIC which is not openly available to the mass public. FPGAs are commonly used to test HDL code at a very cheap cost compared to a full scale tape out, albeit at a slower clock, so we will attempt to multiply our hardware throughput at the correct proportional speedup rate. The FPGA can run at a speed of 50 MHz [[7](#7)], while mainstream ASICs can usually run 10-50x faster than this, but this will still be much faster than processing the image through software means (on the cloud or on the MCU). 
 
 - The FPGA must take in data through the SPI protocol and be able to send data back out through the SPI protocol as well. 
 
-- The FPGA will take in three pixels and run it through a pipeline. Firstly, the FPGA must store all of the RGB (red, green, and blue) values of an image into its onboard memory to prepare it to be processed. While the pixels are being stored into memory, we can start processing some of the data while it is still in the process of gathering data from the MCU. This is because many of the algorithms that will be applied, such as Floyd-Steinberg dithering [[6](#6)], only requires <span style="font-family:times;">5 adjacent pixels</span> for the image to start being processed. We need to set up a state machine that detects whenever a threshold amount of pixels have been loaded into the FPGA, and then, it will start to process this data simultaneously. The third stage of the pipeline is when the data needs to be stored in a final bitmapped processed stage, and then this final image will be sent back out into the MCU and will be ready for printing. This process happens very fast, and doing the math, it should not take more than $3 * (\text{Number of pipeline stages}) * (xy) = 3xy$ clock cycles in order to process a single image, where $x$ and $y$ are the dimensions of the picture.
+- The FPGA will take in three pixels and run it through a pipeline. Firstly, the FPGA must store all of the RGB (red, green, and blue) values of an image into its onboard memory to prepare it to be processed. While the pixels are being stored into memory, we can start processing some of the data while it is still in the process of gathering data from the MCU. This is because many of the algorithms that will be applied, such as Floyd-Steinberg dithering [[6](#6)], only requires <span style="font-family:times;">5 adjacent pixels</span> for the image to start being processed. We need to set up a state machine that detects whenever a threshold amount of pixels have been loaded into the FPGA, and then, it will start to process this data simultaneously. The third stage of the pipeline is when the data needs to be stored in a final bitmapped processed stage, and then this final image will be sent back out into the MCU and will be ready for printing. This process happens very fast, and doing the math, it should not take more than 3 * (Number of pipeline stages) * (xy) = 3xy clock cycles in order to process a single image, where x and y are the dimensions of the picture.
 
 Diagram of sample algorithm (all are pretty similar except for different ALUs):
 ![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal/fpga_image_processing.drawio.png)
@@ -108,22 +108,22 @@ Finally, there will be a switchbox that the user can use. Switches, when turned 
 
 - This block contributes to the overall design by providing a reasonable level of user experience. It informs the user of potential issues pertaining to battery life and printer status and allows the user to change between different image processing algorithms based on their needs. 
 
-- One requirement for the LCD is that it must be able to refresh its status/display at a decent rate so that monitoring/debugging the system is reasonably convenient for the user (< $5 \text{ seconds}$). If something changes in the status of the system, the LCD should be able to reflect upon this change with little lag.
+- One requirement for the LCD is that it must be able to refresh its status/display at a decent rate so that monitoring/debugging the system is reasonably convenient for the user (< 5 seconds). If something changes in the status of the system, the LCD should be able to reflect upon this change with little lag.
 
 - While not directly responsible for the Board Subsystem, the MCU is responsible for sending and processing data that is delivered to this subsystem. Without it, the LCD would fail to function and as a result, the Board Subsystem would essentially be rendered useless. 
 
 ### Power Subsystem
 ##### Power Subsystem Overview:
 
-The power subsystem supplies power to every other subsystem. Namely, it powers components such as the ESP8266 MCU at $3 \text{-} 3.3 \text{ V}$ [[2](#2)], the thermal printer at $5 \text{-}9 \text{ V}$ [[3](#3)], the FPGA at $5 \text{ V}$ [[7](#7)], the LCD at $3.3 \text{ V}$ [[4](#4)], and the infrared sensor at $3\text{-}5 \text{ V}$ [[10](#10)]. Its components are a USB-C controller that will be connected to a PC's USB-C port. This connection will supply power to our four 18650 batteries. We use a regulator system to maintain constant voltage levels to the components stated above. It will also flash the MCU (send program information to the MCU to execute).
+The power subsystem supplies power to every other subsystem. Namely, it powers components such as the ESP8266 MCU at 3-3.3V [[2](#2)], the thermal printer at 5-9 V [[3](#3)], the FPGA at 5 V [[7](#7)], the LCD at 3.3V [[4](#4)], and the infrared sensor at 3-5 V [[10](#10)]. Its components are a USB-C controller that will be connected to a PC's USB-C port. This connection will supply power to our four 18650 batteries. We use a regulator system to maintain constant voltage levels to the components stated above. It will also flash the MCU (send program information to the MCU to execute).
 
 This subsystem as a whole is necessary for supporting the continued operations of the entire system, which includes displaying the diagnostic information, the Wireless Subsystem receiving image data, processing image data, and printing.
 
 ##### Power Subsystem Requirements:
 
-- The other subsystems must be powered on with this subsystem at the stated voltage and current levels or with a maximum of $-5$% deviation.
+- The other subsystems must be powered on with this subsystem at the stated voltage and current levels or with a maximum of -5% deviation.
 
-- It is important that the power system is able to supply the upper conservative limit of $45 \text{ W}$ as well, since this would be able to provide enough power to the system in the case of sub components requiring peak power. 
+- It is important that the power system is able to supply the upper conservative limit of 45W as well, since this would be able to provide enough power to the system in the case of sub components requiring peak power. 
 
 - We also must be able to check the current battery level percent of the 18650 batteries on the LCD in the Board Subsystem. This diagnostic data is to be delivered to the Board Subsystem for displaying to the user.
 
@@ -131,7 +131,7 @@ This subsystem as a whole is necessary for supporting the continued operations o
 
 - Servers are considered outside the scope of this class, so it may be difficult to implement. Additionally, based on our implementation of accepting data from a user, we can have our local server (and hence, our local device) be susceptible to a cyber attack. Using JavaScript makes us potentially vulnerable to some control flow hijacking, which can allow users to attack our device. Since our code is online, attackers can try to precisely send images to hijack the server.
 
-- The printer itself needs to operate at over $150 \text{ degrees Fahrenheit}$ in order to activate the thermal paper, and therefore we must ensure, for the safety of the device for the user, that the specific area intended to be held by the user remains under $120 \text{ degrees Fahrenheit}$ throughout operation. The reason for $120 \text{ degrees Fahrenheit}$ is because this is generally agreed upon for handheld products as the upper limit of a safe-to-touch temperature [[9](#9)], and it would be extremely detrimental if the device were to cause harm by exceeding this rating. 
+- The printer itself needs to operate at over 150 degrees Fahrenheit in order to activate the thermal paper, and therefore we must ensure, for the safety of the device for the user, that the specific area intended to be held by the user remains under 120 degrees Fahrenheit throughout operation. The reason for 120 degrees Fahrenheit is because this is generally agreed upon for handheld products as the upper limit of a safe-to-touch temperature [[9](#9)], and it would be extremely detrimental if the device were to cause harm by exceeding this rating. 
 
 
 # Ethics and Safety
