@@ -4,7 +4,7 @@
 
 Our senior design project name is **Portable Thermal Printer** for ECE 445 Spring 2023.
 
-We are Team 29, with the assistance of TA Shao Hanyin (hanyins)
+We are Team 29, with the assistance of TA Shao Hanyin (hanyins2)
 - Gally Huang (ghuang23)
 - Jason Liu (jliu246)
 - Kevin An (kqan2)
