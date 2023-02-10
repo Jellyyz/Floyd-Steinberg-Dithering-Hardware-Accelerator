@@ -90,7 +90,7 @@ DE10-Lite FPGA:<br>
 Diagram of sample algorithm (all are pretty similar except for different ALUs):
 ![Diagram](https://raw.githubusercontent.com/Jellyyz/ECE445/main/Proposal/fpga_image_processing.drawio.png)
 
-- As for the printer, the printer must be able to interact with the MCU correctly. This means that the ports coming out of the MCU has to be connected correctly to the printer. We also need to make sure that the printer receives enough power so it will be run with power through its own dedicated rail, since we expect that at least $10 \text{ W}$ will be used by the printer during peak run time. 
+- As for the printer, the printer must be able to interact with the MCU correctly. This means that the ports coming out of the MCU has to be connected correctly to the printer. We also need to make sure that the printer receives enough power so it will be run with power through its own dedicated rail, since we expect that at least 10W will be used by the printer during peak run time. 
 
 
 ### Board Subsystem
@@ -98,7 +98,7 @@ Diagram of sample algorithm (all are pretty similar except for different ALUs):
 
 The Board Subsystem is the interactive and diagnostic block that allows for the user to check the status of the entire system at a glance.
 
-The primary component is a small $1.8\text{"}$ raw TFT display [[4](#4)] that displays useful information about the battery level and the status of a printing job for user diagnostics (e.g., completed, failed, paper jam), all of which is processed and delivered from the MCU.
+The primary component is a small 1.8" raw TFT display [[4](#4)] that displays useful information about the battery level and the status of a printing job for user diagnostics (e.g., completed, failed, paper jam), all of which is processed and delivered from the MCU.
 
 There will also be an infrared receiver sensor that will sense if there is still a supply of thermal paper for the thermal printer to print on. If the sensor detects a change in the paper supply, this information will be sent to the MCU, which will have the LCD print out a visual warning/error and prevent the printing process.
 
