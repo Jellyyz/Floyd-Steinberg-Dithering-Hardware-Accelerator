@@ -14,3 +14,12 @@ Learned the basics of Django framework for application development through readi
 
 ## Feb 6, 2023
 Wrote up the WiFi subsystem overview and requirements in preparation for the initial TA meeting and committed changes to the project proposal. 
+
+## Feb 7, 2023
+Met with TA Hanyin Shao, had our proposal (diagram, goals, etc.) reviewed for modification before the deadline. Arranged a weekly meeting time (4:20 pm every Tuesday), and went over general project deliverable requirements.
+
+## Feb 9, 2023
+Met with group to finish the proposal, including completing all the subsystems, revising the diagram, etc.
+
+## Feb 11, 2023
+Discussed components that need to be ordered when the my.ece order processing site is working again for the ECE 445 orders. The components have already been decided on, and we will have them ordered as soon as the issue with the site is fixed.
