@@ -32,3 +32,7 @@ We as a group met to finish up the proposal.
 
 # Feb 11 
 Met with group to hand out work for the week. Kevin shall continue schematic and so will jason, they will try to finish the networking aspect of the project asap. I wil lbe working on the HDL continoully. 
+
+# Feb 13
+
+I finished up some of the image processing HDL as well as the important part of parallezing a lot of the HDL. It is time to meet with the team again soon because I need to understand the format of how the data is being spit out better. 
