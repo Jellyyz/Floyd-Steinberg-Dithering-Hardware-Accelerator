@@ -29,3 +29,6 @@ We as a group met with the TA and she gave us some requirements for our project 
 
 # Feb 9
 We as a group met to finish up the proposal.
+
+# Feb 11 
+Met with group to hand out work for the week. Kevin shall continue schematic and so will jason, they will try to finish the networking aspect of the project asap. I wil lbe working on the HDL continoully. 

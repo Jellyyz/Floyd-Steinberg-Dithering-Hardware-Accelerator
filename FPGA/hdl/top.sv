@@ -1,19 +1,41 @@
 module top(
+    // 64 * 64 image = 4096 addressing for 8 bit data 
+    parameter IMAGEY = 64; 
+    parameter IMAGEX = 64; 
+    parameter IMAGE_SIZE = IMAGE_SIZE; 
+    parameter RGB_SIZE = 8; 
+
     // CLk - Rst Interface
     // 50 mhz clock  
     input logic clk, rst 
-    input logic [7:0] red, green, blue 
+    input logic [RGB_SIZE - 1:0] red, green, blue 
 
 ); 
 
+    logic reset_dithering;
+    logic store_old_p;
+    logic compare_and_store_n;
+    logic calc_quant;
+    logic compute_fin;
 
-// 64 * 64 image = 4096 addressing for 8 bit data 
-parameter IMAGEY = 64; 
-parameter IMAGEX = 64; 
-parameter IMAGE_SIZE = IMAGE_SIZE; 
-logic [7:0] png_data_red_buffer [(IMAGE_SIZE):0];
-logic [7:0] png_data_green_buffer [(IMAGE_SIZE):0];
-logic [7:0] png_data_blue_buffer [(IMAGE_SIZE):0];
+dithering_loop_control control0(
+
+    // CLk - Rst Interface
+    .clk(clk), .rst(rst)
+
+    // control singals 
+    .reset_dithering(reset_dithering), 
+    .store_old_p(store_old_p),
+    .compare_and_store_n(compare_and_store_n), 
+    .calc_quant(calc_quant), 
+    .compute_fin(compute_fin)
+); 
+
+
+
+logic [RGB_SIZE - 1:0] png_data_red_buffer [(IMAGE_SIZE):0];
+logic [RGB_SIZE - 1:0] png_data_green_buffer [(IMAGE_SIZE):0];
+logic [RGB_SIZE - 1:0] png_data_blue_buffer [(IMAGE_SIZE):0];
 parameter CLOCK_SPEED = 50000000; 
 parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED; 
 
@@ -75,10 +97,14 @@ always_ff @(posedge clk or posedge rst)begin
 
 end 
 
+// temp values that have the correct current indexing for the pixel counter 
 logic [15:0] pixel_sweeper_r; 
 logic [15:0] pixel_sweeper_sw; 
 logic [15:0] pixel_sweeper_s; 
 logic [15:0] pixel_sweeper_se; 
+
+// the correct "new" RGB value of the png_data 
+logic [RGB_SIZE - 1:0] png_data_red_buffer_sweeped
 
 always_comb begin 
     pixel_sweeper_r = pixel_sweeper + 15'd1; 
