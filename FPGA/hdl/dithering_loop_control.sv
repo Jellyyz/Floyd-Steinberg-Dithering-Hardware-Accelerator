@@ -1,10 +1,10 @@
 module dithering_loop_control(
     input logic clk, rst, 
+    input logic algorithm_trigger, 
 
     output logic reset_dithering, 
     output logic store_old_p,
     output logic compare_and_store_n, 
-    output logic calc_quant, 
     output logic compute_fin
 
 ); 
@@ -14,7 +14,6 @@ module dithering_loop_control(
         WAIT,
         STORE_OLD_P, 
         COMPARE_AND_STORE_NEW,
-        CALC_QUANT_ERROR, 
         COMPUTE_FINAL
 
     } State, next_state; 
@@ -47,11 +46,8 @@ module dithering_loop_control(
                 next_state = COMPARE_AND_STORE_NEW; 
             end 
             COMPARE_AND_STORE_NEW:begin 
-                next_state = CALC_QUANT_ERROR; 
-            end
-            CALC_QUANT_ERROR:begin 
                 next_state = COMPUTE_FINAL; 
-            end 
+            end
             COMPUTE_FINAL:begin 
                 next_state = WAIT; 
             end 
@@ -62,25 +58,25 @@ module dithering_loop_control(
 
     always_comb : state_condition 
     begin
-
+        reset_dithering = 1'b0; 
+        store_old_p = 1'b0; 
+        compare_and_store_n = 1'b0; 
+        compute_fin = 1'b0; 
         unique case(state)
             RESET: begin 
-
+                reset_dithering = 1'b1; 
             end 
             WAIT:begin 
                 // wait for a signal from the user
             end 
             STORE_OLD_P:begin 
-            
+                store_old_p = 1'b1; 
             end 
             COMPARE_AND_STORE_NEW:begin 
-            
+                compare_and_store_n = 1'b1; 
             end
-            CALC_QUANT_ERROR:begin 
-            
-            end 
             COMPUTE_FINAL:begin 
-                
+                compute_fin = 1'b1; 
             end 
 
         endcase 
