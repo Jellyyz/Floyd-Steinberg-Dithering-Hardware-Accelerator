@@ -59,3 +59,6 @@ I tried playing around with the server again. Didn't really make much progress, 
 in the previous day's entry.
 
 ## Feb. 14, 2023 (20 minute TA meeting at 4:20 PM)
+Essentially, we can handle POST requests (i.e., processing our data to the server), but our GET requests are not quite there yet (i.e., fetching data from the server). We may be able to test the GET requests in JavaScript or maybe even in the Django project. We'll have to do some digging.
+
+For our TA meeting, we need to modify our proposal and fit it to the design document. 
