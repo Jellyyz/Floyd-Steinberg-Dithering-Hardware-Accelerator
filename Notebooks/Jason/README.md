@@ -62,3 +62,6 @@ in the previous day's entry.
 Essentially, we can handle POST requests (i.e., processing our data to the server), but our GET requests are not quite there yet (i.e., fetching data from the server). We may be able to test the GET requests in JavaScript or maybe even in the Django project. We'll have to do some digging.
 
 For our TA meeting, we need to modify our proposal and fit it to the design document. 
+
+## Feb. 15, 2023 
+Users can send a 'GET' request to the server to fetch the most recently uploaded image. For now, I tested with my PC hosting the server and my phone making this specific 'GET' request on the same network. The template page updated to embed the most recently uploaded image on the phone's display. If the PC uploads another image, the phone can send another request to update its display (and vice-versa). We will probably do something similar with the ESP8266 - it will send a 'GET' request to one of our urls, which has a request handler which will send this most recently uploaded image as context (maybe convert it to a suitable format in Python as well?).
