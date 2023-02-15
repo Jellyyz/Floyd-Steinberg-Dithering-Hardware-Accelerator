@@ -23,3 +23,13 @@ Met with group to finish the proposal, including completing all the subsystems, 
 
 ## Feb 11, 2023
 Discussed components that need to be ordered when the my.ece order processing site is working again for the ECE 445 orders. The components have already been decided on, and we will have them ordered as soon as the issue with the site is fixed.
+
+## Feb 14, 2023
+Placed order for parts as listed on my.ece with new CFOP number:
+- A 5 pack of SMT ESP8266 MCUs
+- A 5 pack of ESP8266 development baords for prototyping/testing
+- A 3 pack of USB to Micro-B cables
+
+Order was approved on same day and will be shipped to the ECEB via Amazon so we may begin testing the microcontrollers before the end of this week. 
+
+In addition, the group met with our TA to discuss areas for improvement on the proposal, which will also be necessary moving forward when creating the design document.  
