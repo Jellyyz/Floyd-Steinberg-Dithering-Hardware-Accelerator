@@ -16,11 +16,11 @@ module dithering_loop_control(
         COMPARE_AND_STORE_NEW,
         COMPUTE_FINAL
 
-    } State, next_state; 
+    } state, next_state; 
 
     always_ff @ (posedge clk or posedge rst)begin 
         if(rst)begin 
-            state <= RESET
+            state <= RESET;
         end 
         else begin 
             state <= next_state; 
@@ -28,8 +28,8 @@ module dithering_loop_control(
 
     end 
 
-    always_comb : next_state_condition 
-    begin 
+    always_comb 
+    begin : next_state_condition 
         unique case(state)
             RESET: begin 
                 next_state = WAIT;
@@ -56,8 +56,8 @@ module dithering_loop_control(
     
     end 
 
-    always_comb : state_condition 
-    begin
+    always_comb 
+    begin : state_condition 
         reset_dithering = 1'b0; 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 

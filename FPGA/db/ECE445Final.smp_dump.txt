@@ -1,0 +1,24 @@
+
+State Machine - |top|pixel_algorithm_unit:blue|dithering_loop_control:control0|state
+Name state.COMPARE_AND_STORE_NEW state.STORE_OLD_P state.WAIT state.RESET state.COMPUTE_FINAL 
+state.RESET 0 0 0 0 0 
+state.WAIT 0 0 1 1 0 
+state.STORE_OLD_P 0 1 0 1 0 
+state.COMPARE_AND_STORE_NEW 1 0 0 1 0 
+state.COMPUTE_FINAL 0 0 0 1 1 
+
+State Machine - |top|pixel_algorithm_unit:green|dithering_loop_control:control0|state
+Name state.COMPARE_AND_STORE_NEW state.STORE_OLD_P state.WAIT state.RESET state.COMPUTE_FINAL 
+state.RESET 0 0 0 0 0 
+state.WAIT 0 0 1 1 0 
+state.STORE_OLD_P 0 1 0 1 0 
+state.COMPARE_AND_STORE_NEW 1 0 0 1 0 
+state.COMPUTE_FINAL 0 0 0 1 1 
+
+State Machine - |top|pixel_algorithm_unit:red|dithering_loop_control:control0|state
+Name state.COMPARE_AND_STORE_NEW state.STORE_OLD_P state.WAIT state.RESET state.COMPUTE_FINAL 
+state.RESET 0 0 0 0 0 
+state.WAIT 0 0 1 1 0 
+state.STORE_OLD_P 0 1 0 1 0 
+state.COMPARE_AND_STORE_NEW 1 0 0 1 0 
+state.COMPUTE_FINAL 0 0 0 1 1 

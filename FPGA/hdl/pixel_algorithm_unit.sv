@@ -1,21 +1,26 @@
 // UIUC ECE 445 Senior Design
 // RTL by : Gally Huang
 
-module pixel_algorithm_unit(
+module pixel_algorithm_unit
+# (
+parameter CLOCK_SPEED = 50000000,
+parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
+parameter IMAGEY = 64,
+parameter IMAGEX = 64,
+parameter IMAGE_SIZE = IMAGEY * IMAGEX,
+parameter RGB_SIZE = 8)
+
+
+(
     // 64 * 64 image = 4096 addressing for 8 bit data 
 
-    parameter CLOCK_SPEED = 50000000; 
-    parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED; 
-    parameter IMAGEY = 64; 
-    parameter IMAGEX = 64; 
-    parameter IMAGE_SIZE = IMAGE_SIZE; 
-    parameter RGB_SIZE = 8; 
+  
 
     // CLk - Rst Interface
     // 50 mhz clock  
-    input logic clk, rst 
-    input logic [RGB_SIZE - 1:0] color
-
+    input logic clk, rst, 
+    input logic [RGB_SIZE - 1:0] color,
+    output logic [RGB_SIZE - 1:0] color_out
 ); 
 
 // wikipedia formula : 
@@ -38,7 +43,7 @@ logic [15:0] pixel_sweeper;
 dithering_loop_control control0(
 
     // CLk - Rst Interface
-    .clk(clk), .rst(rst)
+    .clk(clk), .rst(rst),
 
     // control singals 
     .reset_dithering(reset_dithering), 
@@ -70,14 +75,19 @@ logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_s;
 logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_se;
 
 // temp values that have the correct current indexing for the pixel counter 
-logic [15:0] pixel_sweeper_r; 
-logic [15:0] pixel_sweeper_sw; 
-logic [15:0] pixel_sweeper_s; 
-logic [15:0] pixel_sweeper_se; 
+logic [IMAGE_SIZE:0] pixel_sweeper_r; 
+logic [IMAGE_SIZE:0] pixel_sweeper_sw; 
+logic [IMAGE_SIZE:0] pixel_sweeper_s; 
+logic [IMAGE_SIZE:0] pixel_sweeper_se; 
+always_ff @(posedge clk)begin 
 
+    color_out <=  png_data_color_buffer[pixel_sweeper];
+
+end 
 
 always_ff @(posedge clk or posedge rst) begin : PNG_color_REG
     if(rst) begin
+	 int i; 
         for(i = 0; i < 4096; i++) begin 
             png_data_color_buffer[i] <= 8'b10101010; 
         end
@@ -115,26 +125,33 @@ always_ff @(posedge clk or posedge rst)begin : QUANT_ERROR_CALC
         png_data_color_buffer_q_error <= '0; 
     end 
     else begin 
-        png_data_color_buffer_q_error <= (png_data_color_buffer_old - png_data_color_closest)
+        png_data_color_buffer_q_error <= (png_data_color_buffer_old - png_data_color_closest);
     end 
 
 end 
 
 always_comb begin 
-    pixel_sweeper_r = pixel_sweeper + 15'd1; 
-    pixel_sweeper_se = pixel_sweeper + 15'd63; 
-    pixel_sweeper_s = pixel_sweeper + 15'd64; 
-    pixel_sweeper_sw = pixel_sweeper + 15'd65; 
+    pixel_sweeper_r = pixel_sweeper + 1'b1; 
+    pixel_sweeper_se = pixel_sweeper + 5'd63; 
+    pixel_sweeper_s = pixel_sweeper + 6'd64; 
+    pixel_sweeper_sw = pixel_sweeper + 6'd65; 
     // account for going out of bounds
     if(pixel_sweeper_r[5:0] == 6'b000000)
-        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_r] + (png_data_color_closest >> 4) * 7;
+        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_r] + (png_data_color_buffer_q_error >> 4) * 7;
+    else 
+        png_data_color_buffer_sweeped_r = '0;
     if(pixel_sweeper_sw <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_data_color_closest >> 4) * 3; 
+        png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_data_color_buffer_q_error >> 4) * 3; 
+    else 
+        png_data_color_buffer_sweeped_sw = '0;   
     if(pixel_sweeper_s <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_data_color_closest >> 4) * 5; 
+        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_data_color_buffer_q_error >> 4) * 5; 
+    else 
+        png_data_color_buffer_sweeped_s = '0;  
     if(pixel_sweeper_se <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_data_color_closest >> 4); 
-
+        png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_data_color_buffer_q_error >> 4); 
+    else 
+        png_data_color_buffer_sweeped_se = '0;  
 end 
 
 always_comb begin: CLOSEST_AND_QUANT_CALC

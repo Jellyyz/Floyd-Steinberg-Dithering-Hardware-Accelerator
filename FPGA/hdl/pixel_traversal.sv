@@ -1,4 +1,15 @@
-module pixel_traversal(
+module pixel_traversal
+
+# (
+parameter CLOCK_SPEED = 50000000,
+parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
+parameter IMAGEY = 64,
+parameter IMAGEX = 64,
+parameter IMAGE_SIZE = IMAGEY * IMAGEX,
+parameter RGB_SIZE = 8)
+
+
+(
     input logic clk, rst, 
     output logic [15:0] pixel_sweeper
 ); 
