@@ -1,0 +1,51 @@
+2/22
+block diagram (gally):
+	- usb power for each, x
+	- bidirectional spi, x
+	- replace battery with battery pack,x
+	- more exact data from datasheet x
+
+
+styling & formatting
+	- content (everyone)
+	- schedule revamp (gally)
+	- 
+rv tables :
+	- wifi (kevin)
+	- imaging (jason)
+	- power (jason)
+	- board (kevin)
+
+
+cost 
+	- battery in cost (jason)
+
+
+explain webserver again (kevin)
+
+
+
+try to have 99% of it done before 4pm 2/23
+
+
+---- 
+obj of meeting
+
+- finish all of 445 design doc
+ - usb connector parts... 
+ - battery parts 
+- when to sign up for pcb review
+
+- meeting times next week for pcb layout?
+
+- anyone have time to meet with TA to pass PCB DRC?
+
+
+
+2/23 
+----- 
+time of next meeting = tuesday at 4 pcb layout 
+
+
+
+
