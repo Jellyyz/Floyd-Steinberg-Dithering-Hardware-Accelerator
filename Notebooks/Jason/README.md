@@ -71,3 +71,21 @@ We had a virtual meeting where we discussed roles and what to do going forward. 
 
 ## Feb. 17, 2023
 We are starting the Team Contract and Design Document and need to carefully go through them to determine our project's trajectory going forward.
+
+## Feb. 20-22, 2023
+Battery discussion with Gruev on Zoom in that one place next to ECEB 
+
+## Feb. 23, 2023
+Design document finish remote
+
+## Feb. 25, 2023
+Got ESP dev boards...
+
+## Feb. 26, 2023
+Programmed ESP to scan/connect/get request
+
+## Feb. 27, 2023
+Design review...
+
+## Feb. 28, 2023
+Meeting... updating on progress... meeting next.
