@@ -89,3 +89,21 @@ Design review...
 
 ## Feb. 28, 2023
 Meeting... updating on progress... meeting next.
+
+## March 2,2023
+Meeting at fancy place for document or something I believe
+
+## March 4, 2023
+Meeting at ECEB 1st floor => C imp. progress
+
+## March 5, 2023
+C imp. on MCU
+
+## March 7, 2023
+Meeting after TA on 3rd floor => Trying to fix server and start SPI work
+
+## March 9, 2023
+Meeting at fancy place at 6 PM
+  Kevin : Server
+  Gally : Parts to buy
+  Jason : SPI
