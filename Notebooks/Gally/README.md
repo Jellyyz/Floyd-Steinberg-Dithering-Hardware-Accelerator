@@ -36,3 +36,7 @@ Met with group to hand out work for the week. Kevin shall continue schematic and
 # Feb 13
 
 I finished up some of the image processing HDL as well as the important part of parallezing a lot of the HDL. It is time to meet with the team again soon because I need to understand the format of how the data is being spit out better. 
+
+# Feb 16 
+
+Group meeting with the team to discuss what internals need to be done. 
