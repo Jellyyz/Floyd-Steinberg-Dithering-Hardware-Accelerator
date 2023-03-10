@@ -107,3 +107,7 @@ Meeting at fancy place at 6 PM
   Kevin : Server
   Gally : Parts to buy
   Jason : SPI
+
+Slave
+
+![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Slave.jpg)
