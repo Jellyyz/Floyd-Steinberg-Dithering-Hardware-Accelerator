@@ -1,0 +1,15 @@
+Info on SCLK:
+	https://www.esp8266.com/viewtopic.php?f=32&t=8867
+
+Info on SPI (or GPIO) pins:
+	https://www.esp8266.com/wiki/doku.php?id=esp8266_gpio_pin_allocations
+	https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/
+
+Info on SPI (in general):
+	https://en.wikipedia.org/wiki/Serial_Peripheral_Interface
+
+Info on SPI via Arduino:
+	http://www.gammon.com.au/forum/?id=10892
+	https://github.com/esp8266/Arduino/blob/master/libraries/SPI/SPI.cpp
+
+See DE10-Lite user manual for pinouts.

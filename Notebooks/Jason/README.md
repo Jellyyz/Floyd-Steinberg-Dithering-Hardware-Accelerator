@@ -111,3 +111,9 @@ Meeting at fancy place at 6 PM
 Slave
 
 ![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Slave.jpg)
+
+## March 10, 2023
+SPI stuff...
+
+## March 11, 2023
+SPI stuff...
