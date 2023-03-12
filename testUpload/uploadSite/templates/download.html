@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en"> <!-- Will enumerate 'Name' and 'Image' fields if working -->
+<head>
+  <title>Development Site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+</head>
+
+<body>
+  <b>Thermal Printer Image Download!</b>
+  <a href="{% url 'upload:image_request' %}">
+    Upload app
+  </a><br>
+  <!-- Media directory test -->
+  <img src="{% get_media_prefix %}images/Row.png" alt="test">
+  <form action="image_query" method="GET">
+    <button type="submit">
+      Smth
+    </button>
+  </form>
+  {% if img %}
+    <h3 class="good">Has context</h3>
+    <img src="{% get_media_prefix %}{{ img }}">
+  {% else %}
+    <h3 class="bad">Has no context</h3>
+  {% endif %}
+</body>
+<script
+  src="https://code.jquery.com/jquery-3.6.3.min.js"
+  integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+  crossorigin="anonymous"></script>
+</html>
