@@ -5,12 +5,14 @@ module pixel_algorithm_unit
 # (
 parameter CLOCK_SPEED = 50000000,
 parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
-parameter IMAGEY = 64,
+parameter IMAGEY = 64, // Assume image is resized such that x, y are base2 (possible on server-side)
 parameter IMAGEX = 64,
 parameter IMAGE_SIZE = IMAGEY * IMAGEX,
-parameter RGB_SIZE = 8)
-
-
+parameter RGB_SIZE = 8, 
+parameter IMAGEYlog2 = $clog2(IMAGEY), 
+parameter IMAGEXlog2 = $clog2(IMAGEX) 
+)
+ 
 (
     // 64 * 64 image = 4096 addressing for 8 bit data 
 
@@ -27,7 +29,7 @@ parameter RGB_SIZE = 8)
 // for each y from top to bottom do
 //     for each x from left to right do
 //state 1            oldpixel := pixels[x][y] 
-//state 2  -no need? newpixel := find_closest_palette_color(oldpixel)
+//state 2  -no need? // newpixel := find_closest_palette_color(oldpixel)
 //state 2            pixels[x][y] := newpixel
 //state 2            quant_error := oldpixel - newpixel
 //state 3            pixels[x + 1][y    ] := pixels[x + 1][y    ] + quant_error × 7 / 16
@@ -38,7 +40,7 @@ logic reset_dithering;
 logic store_old_p;
 logic compare_and_store_n;
 logic compute_fin;
-logic [15:0] pixel_sweeper; 
+logic [15:0] pixel_sweeper;
 
 dithering_loop_control control0(
 
@@ -75,7 +77,7 @@ logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_s;
 logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_se;
 
 // temp values that have the correct current indexing for the pixel counter 
-logic [IMAGE_SIZE:0] pixel_sweeper_r; 
+logic [IMAGE_SIZE:0] pixel_sweeper_e; 
 logic [IMAGE_SIZE:0] pixel_sweeper_sw; 
 logic [IMAGE_SIZE:0] pixel_sweeper_s; 
 logic [IMAGE_SIZE:0] pixel_sweeper_se; 
@@ -98,7 +100,7 @@ always_ff @(posedge clk or posedge rst) begin : PNG_color_REG
         end 
         else if(compute_fin) begin 
 
-            png_data_color_buffer[pixel_sweeper_r] <= png_data_color_buffer_sweeped_r;
+            png_data_color_buffer[pixel_sweeper_e] <= png_data_color_buffer_sweeped_r;
             png_data_color_buffer[pixel_sweeper_sw] <= png_data_color_buffer_sweeped_sw;
             png_data_color_buffer[pixel_sweeper_s] <= png_data_color_buffer_sweeped_s;
             png_data_color_buffer[pixel_sweeper_se] <= png_data_color_buffer_sweeped_se;
@@ -119,7 +121,7 @@ always_ff @(posedge clk or posedge rst) begin : OLD_PIXEL
 end
 
 
-always_ff @(posedge clk or posedge rst)begin : QUANT_ERROR_CALC
+always_ff @(posedge clk or posedge rst) begin : QUANT_ERROR_CALC
 
     if(rst) begin 
         png_data_color_buffer_q_error <= '0; 
@@ -129,29 +131,39 @@ always_ff @(posedge clk or posedge rst)begin : QUANT_ERROR_CALC
     end 
 
 end 
+logic [RGB_SIZE - 1:0] png_mult_16; 
+always_comb begin : COMPUTE_PIXELS
+    
 
-always_comb begin 
-    pixel_sweeper_r = pixel_sweeper + 1'b1; 
-    pixel_sweeper_se = pixel_sweeper + 5'd63; 
-    pixel_sweeper_s = pixel_sweeper + 6'd64; 
-    pixel_sweeper_sw = pixel_sweeper + 6'd65; 
+
+    png_data_color_buffer_sweeped_sw = '0; 
+    png_data_color_buffer_sweeped_s = '0;  
+    png_data_color_buffer_sweeped_se = '0;  
+
+
+    pixel_sweeper_e = pixel_sweeper + 1'b1; 
+    pixel_sweeper_sw = pixel_sweeper + (IMAGEY - 1); 
+    pixel_sweeper_s = pixel_sweeper + (IMAGEY); 
+    pixel_sweeper_se = pixel_sweeper + (IMAGEY + 1); 
     // account for going out of bounds
-    if(pixel_sweeper_r[5:0] == 6'b000000)
-        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_r] + (png_data_color_buffer_q_error >> 4) * 7;
+    if(pixel_sweeper_e[(IMAGEXlog2 - 1) : 0] != (IMAGEX - 1'b1))
+        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_e] + (png_mult_16) * 7;
     else 
         png_data_color_buffer_sweeped_r = '0;
-    if(pixel_sweeper_sw <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_data_color_buffer_q_error >> 4) * 3; 
-    else 
-        png_data_color_buffer_sweeped_sw = '0;   
-    if(pixel_sweeper_s <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_data_color_buffer_q_error >> 4) * 5; 
-    else 
-        png_data_color_buffer_sweeped_s = '0;  
-    if(pixel_sweeper_se <= IMAGE_SIZE)
-        png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_data_color_buffer_q_error >> 4); 
-    else 
-        png_data_color_buffer_sweeped_se = '0;  
+    
+    // Left cnd: True if pixel_sweeper not on bottom row
+    if (pixel_sweeper < (IMAGE_SIZE - IMAGEY)) begin
+        // SW : Can do it if pixel_sweeper not on leftmost column (modulo IMAGEX != 0)
+        if (pixel_sweeper[(IMAGEXlog2 - 1): 0] != '0) begin
+            png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_mult_16) * 3; 
+        end
+        // S : Can do it if got inside this loop 
+        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_mult_16) * 5; 
+        // SE : Can do it if pixel_sweeper not on rightmost column (modulo IMAGEX != IMAGEX - 1)
+        if (pixel_sweeper[(IMAGEXlog2 - 1): 0] != (IMAGEX - 1'b1)) begin
+            png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_mult_16); 
+        end
+    end  
 end 
 
 always_comb begin: CLOSEST_AND_QUANT_CALC
@@ -172,7 +184,7 @@ end
 
 //   (1/16)
 // * = color[x] 
-// 7 = color[x + 1]  // r
+// 7 = color[x + 1]  // e
 // 3 = color[x + 63] // sw 
 // 5 = color[x + 64] // s 
 // 1 = color[x + 65]  // se

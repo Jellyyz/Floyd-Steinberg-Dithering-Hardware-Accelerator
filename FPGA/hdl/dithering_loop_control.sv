@@ -49,7 +49,8 @@ module dithering_loop_control(
                 next_state = COMPUTE_FINAL; 
             end
             COMPUTE_FINAL:begin 
-                next_state = WAIT; 
+                next_state = STORE_OLD_P; // this is implemented for correctness
+                // next_state = WAIT; // this is implemented when we want speed 
             end 
 
         endcase 
