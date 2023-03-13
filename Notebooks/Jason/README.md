@@ -123,3 +123,5 @@ Didn't code anything... read a little bit about SPI. We send and receive at the 
 
 ## March 13, 2023
 SPI advanced... for a given buffer, transfer them from MCU to FPGA and also get the new buffer where each old byte b is now mapped to f(b), where f is processing function(s) performed on the FPGA. Want to minimize the number of SPI_CLK cycles but first, we want correctness... don't want to infinitely loop() either - want to know for sure when we're done so the MCU is in total control over the system. Idea: have the FPGA raise a signal when a byte is ready to be sent to the MCU. This signal is checked before each SPI transfer when the SS is HIGH (but SPI is still going on), which has the MCU store the received byte in the next position (received pointer points to this) of the array/vector/buffer. On falling edge of SS, FPGA lowers the signal. Or maybe there's a simpler solution.
+
+Worked on imaging HDL, expanding SPI
