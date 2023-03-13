@@ -2,7 +2,7 @@
 /* ...displays a dash on bottom if In0 = LOW
  * ...displays a dash on top if 	  In0 = HIGH
  */
-module HexDriverOverload (
+module HexDriverD (
     input	[3:0] In0,
 	output logic	[6:0] Out0);
 		
