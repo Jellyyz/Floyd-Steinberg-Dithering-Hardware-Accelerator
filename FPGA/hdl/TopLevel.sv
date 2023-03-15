@@ -78,7 +78,7 @@ parameter RGB_SIZE = 8
 		.data_in(8'b11111111), 
 		.data_out(ram_out), 
 		.address(7'b1111111)
-	); 
+	);
 
 	SPI_control SPI_control(
 		.clk(MAX10_CLK1_50),
