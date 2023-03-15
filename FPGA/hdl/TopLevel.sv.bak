@@ -1,5 +1,5 @@
 // Use saved pinouts and ensure their I/O Standards are all at 3.3-V LTTVL via Pin Planner.
-module TopLevel 
+module TestSPI 
 # (
 parameter CLOCK_SPEED = 50000000,
 parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
@@ -38,7 +38,7 @@ parameter RGB_SIZE = 8
 		input logic SPI_CS,
 		
 		// Denotes whether data on the MISO line is valid (i.e., useful to the master) //
-		output logic data_valid
+		output logic data_valid,
 		
 );
 	// Each `received` is a byte. For this example, we have a maximum of 8 bytes ([7:0]) to receive.
@@ -65,13 +65,13 @@ parameter RGB_SIZE = 8
 	
 	HexDriver hex_driver0 (curr_byte, HEX0[6:0]);
 	logic [7:0] ram_out, color_out;
-	mem_block #(
-			.CLOCK_SPEED(50000000),
-			.PIXEL_COUNTER(50000000 / CLOCK_SPEED),
-			.IMAGEY(64),
-			.IMAGEX(64),
-			.IMAGE_SIZE(IMAGEY * IMAGEX),
-			.RGB_SIZE(8)
+	mem_block # (
+			parameter CLOCK_SPEED = 50000000,
+			parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
+			parameter IMAGEY = 64,
+			parameter IMAGEX = 64,
+			parameter IMAGE_SIZE = IMAGEY * IMAGEX,
+			parameter RGB_SIZE = 8
 	) memory (
 		.clk(MAX10_CLK1_50), 
 		.wr_en(1'b1), 

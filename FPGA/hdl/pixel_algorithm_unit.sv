@@ -131,7 +131,7 @@ always_ff @(posedge clk or posedge rst) begin : QUANT_ERROR_CALC
     end 
 
 end 
-logic [RGB_SIZE - 1:0] png_mult_16; 
+logic [RGB_SIZE - 1:0] png_quant_div_16; 
 always_comb begin : COMPUTE_PIXELS
     
 
@@ -145,23 +145,23 @@ always_comb begin : COMPUTE_PIXELS
     pixel_sweeper_sw = pixel_sweeper + (IMAGEY - 1); 
     pixel_sweeper_s = pixel_sweeper + (IMAGEY); 
     pixel_sweeper_se = pixel_sweeper + (IMAGEY + 1); 
+
+    png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
     // account for going out of bounds
     if(pixel_sweeper_e[(IMAGEXlog2 - 1) : 0] != (IMAGEX - 1'b1))
-        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_e] + (png_mult_16) * 7;
-    else 
-        png_data_color_buffer_sweeped_r = '0;
-    
+        png_data_color_buffer_sweeped_r = png_data_color_buffer[pixel_sweeper_e] + (png_quant_div_16) * 7;
+
     // Left cnd: True if pixel_sweeper not on bottom row
     if (pixel_sweeper < (IMAGE_SIZE - IMAGEY)) begin
         // SW : Can do it if pixel_sweeper not on leftmost column (modulo IMAGEX != 0)
         if (pixel_sweeper[(IMAGEXlog2 - 1): 0] != '0) begin
-            png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_mult_16) * 3; 
+            png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se] + (png_quant_div_16) * 3; 
         end
         // S : Can do it if got inside this loop 
-        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_mult_16) * 5; 
+        png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + (png_quant_div_16) * 5; 
         // SE : Can do it if pixel_sweeper not on rightmost column (modulo IMAGEX != IMAGEX - 1)
         if (pixel_sweeper[(IMAGEXlog2 - 1): 0] != (IMAGEX - 1'b1)) begin
-            png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_mult_16); 
+            png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw] + (png_quant_div_16); 
         end
     end  
 end 

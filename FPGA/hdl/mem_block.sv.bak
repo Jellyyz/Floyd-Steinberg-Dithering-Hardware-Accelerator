@@ -1,4 +1,4 @@
-module mem_block
+module basic_ram
 # (
     parameter CLOCK_SPEED = 50000000,
     parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
@@ -19,7 +19,7 @@ module mem_block
     output logic [(RGB_SIZE - 1):0] data_out,
     input logic [$clog2(IMAGE_SIZE):0] address
 );
-    reg [(RGB_SIZE - 1):0] mem [(IMAGE_SIZE- 1):0]; /* synthesis ramstyle = M9K */
+    reg [(RGB_SIZE - 1):0] mem [(IMAGE_SIZE- 1):0] /* synthesis ramstyle = M9K */;
     // To initialize the RAM, Quartus supports initialization
     // which normal RAMs and synthesis do not support.
     initial begin
