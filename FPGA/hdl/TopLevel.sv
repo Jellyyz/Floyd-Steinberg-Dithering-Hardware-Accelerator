@@ -38,7 +38,7 @@ parameter RGB_SIZE = 8
 		input logic SPI_CS,
 		
 		// Denotes whether data on the MISO line is valid (i.e., useful to the master) //
-		output logic data_valid,
+		output logic data_valid
 		
 );
 	// Each `received` is a byte. For this example, we have a maximum of 8 bytes ([7:0]) to receive.
@@ -78,7 +78,7 @@ parameter RGB_SIZE = 8
 		.data_in(8'b11111111), 
 		.data_out(ram_out), 
 		.address(7'b1111111)
-	); 
+	);
 
 	SPI_control SPI_control(
 		.clk(MAX10_CLK1_50),
