@@ -1,13 +1,22 @@
 // Use saved pinouts and ensure their I/O Standards are all at 3.3-V LTTVL via Pin Planner.
+// COPYRIGHT 2023
+// 
+// Top Level HDL of Group 29 ECE445 SP23
+
 module TopLevel 
 # (
-parameter CLOCK_SPEED = 50000000,
-parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
-parameter IMAGEY = 64,
-parameter IMAGEX = 64,
-parameter IMAGE_SIZE = IMAGEY * IMAGEX,
-parameter RGB_SIZE = 8
-)
+	parameter CLOCK_SPEED = 50000000,
+	parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
+	parameter IMAGEY = 64,
+	parameter IMAGEX = 64,
+	parameter IMAGE_SIZE = IMAGEY * IMAGEX,
+	parameter IMAGEYlog2 = $clog2(IMAGEY), 
+	parameter IMAGEXlog2 = $clog2(IMAGEX),
+	parameter IMAGE_ADDR_WIDTH = $clog2(IMAGE_SIZE),
+	parameter RGB_SIZE = 8,
+	parameter IMAGESIZElog2idx = ($clog2(IMAGE_SIZE) - 1),
+	parameter ADJ_PIXELS = 4
+) 
 
 (
 
@@ -18,7 +27,7 @@ parameter RGB_SIZE = 8
       	input logic [1:0] KEY,
 
       	///////// SW /////////
-      	input logic [6: 0] SW,
+      	input logic [9: 0] SW,
 
     	/////////// LED /////////
       	output logic [ 9: 0] LED,
@@ -36,7 +45,10 @@ parameter RGB_SIZE = 8
 		input logic SPI_MOSI,		
 		output logic SPI_MISO,
 		input logic SPI_CS,
-		
+
+		///////// General Arduino /////
+
+
 		// Denotes whether data on the MISO line is valid (i.e., useful to the master) //
 		output logic data_valid
 		
@@ -45,59 +57,65 @@ parameter RGB_SIZE = 8
 	
 	logic rst;
 	logic [7:0] first_byte, last_byte, curr_byte;
-	
+	logic [IMAGE_ADDR_WIDTH - 1:0] WR_RAM_ADDR, RD_RAM_ADDR;
 	assign rst = ~(KEY[1]);
-
-	HexDriverD hex_driver5 (SPI_CLK, HEX5[6:0]);
-
-	
-	HexDriverD hex_driver4 (SPI_MISO, HEX4[6:0]);
-
-		
-	HexDriverD hex_driver3 (SPI_MOSI, HEX3[6:0]); 
+	assign LED = 10'h0; 
+	assign data_valid = 1'b0; 
 
 
-	HexDriver hex_driver2 (last_byte, HEX2[6:0]); 
+	logic LD_RAM, RD_RAM; 
+	logic done_compute; 
 
+	HexDriverD hex_driver5 (4'b1111, HEX5[6:0]);
+	HexDriverD hex_driver4 (4'b1111, HEX4[6:0]);
+	HexDriverD hex_driver3 (4'b1111, HEX3[6:0]); 
+	HexDriver hex_driver2 (4'b1111, HEX2[6:0]);
+	HexDriver hex_driver1 (4'b1111, HEX1[6:0]);
+	HexDriver hex_driver0 (4'b1111, HEX0[6:0]);
 
-	HexDriver hex_driver1 (first_byte, HEX1[6:0]);
+	logic [(RGB_SIZE - 1):0] ram_out, color_out;
 
-	
-	HexDriver hex_driver0 (curr_byte, HEX0[6:0]);
-	logic [7:0] ram_out, color_out;
-	mem_block #(
-			.CLOCK_SPEED(50000000),
-			.PIXEL_COUNTER(50000000 / CLOCK_SPEED),
-			.IMAGEY(64),
-			.IMAGEX(64),
-			.IMAGE_SIZE(IMAGEY * IMAGEX),
-			.RGB_SIZE(8)
-	) memory (
-		.clk(MAX10_CLK1_50), 
-		.wr_en(1'b1), 
-		.data_in(8'b11111111), 
-		.data_out(ram_out), 
-		.address(7'b1111111)
-	);
+	TopLevel_control top_control(
+		// input 
+		.clk(MAX10_CLK1_50), .rst(rst), 
+		.done_compute(done_compute),
 
-	SPI_control SPI_control(
-		.clk(MAX10_CLK1_50),
-		.rst(rst),
-		.SPI_CLK(SPI_CLK),
-		.SPI_MISO(SPI_MISO),
-		.SPI_MOSI(SPI_MOSI),
-		.SPI_CS(SPI_CS),
-		.first_byte(first_byte),
-		.last_byte(last_byte),
-		.curr_byte(curr_byte)
+		// output 
+		.LD_RAM(LD_RAM),
+		.RD_RAM(RD_RAM),
+		.WR_RAM_ADDR(WR_RAM_ADDR), 
+		.RD_RAM_ADDR(RD_RAM_ADDR)
+
 	); 
-
 	pixel_algorithm_unit gray(
-	.clk(MAX10_CLK1_50), 
-	.rst(rst), 
-    .color(ram_out),
-    .color_out(color_out)
-);
+		// input 
+		.clk(MAX10_CLK1_50), 
+		.rst(rst),
+		.color({8{SPI_MOSI}}),
+		.LD_RAM(LD_RAM), 
+		.RD_RAM(RD_RAM),
+		.WR_RAM_ADDR(WR_RAM_ADDR), 
+		.RD_RAM_ADDR(RD_RAM_ADDR),
+
+		// output 
+		.color_out(color_out),
+		.done_compute(done_compute)
+	);
+	
+	// SPI_control SPI_control(
+	// 	// input 
+	// 	.clk(MAX10_CLK1_50), .rst(rst),
+		
+	// 	// output
+	// 	.SPI_CLK(SPI_CLK),
+	// 	.SPI_MISO(SPI_MISO),
+	// 	.SPI_MOSI(SPI_MOSI),
+	// 	.SPI_CS(SPI_CS),
+	// 	.first_byte(first_byte),
+	// 	.last_byte(last_byte),
+	// 	.curr_byte(curr_byte)
+	// ); 
+
 
 
 endmodule 

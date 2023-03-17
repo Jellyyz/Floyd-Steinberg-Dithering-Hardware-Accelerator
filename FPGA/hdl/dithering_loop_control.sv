@@ -5,7 +5,7 @@ module dithering_loop_control(
     output logic reset_dithering, 
     output logic store_old_p,
     output logic compare_and_store_n, 
-    output logic compute_fin
+    output logic [3:0] compute_fin
 
 ); 
     // declaration of all states 
@@ -14,7 +14,11 @@ module dithering_loop_control(
         WAIT,
         STORE_OLD_P, 
         COMPARE_AND_STORE_NEW,
-        COMPUTE_FINAL
+        COMPUTE_FINAL_E, 
+        COMPUTE_FINAL_SW,
+        COMPUTE_FINAL_S, 
+        COMPUTE_FINAL_SE 
+    
 
     } state, next_state; 
 
@@ -31,6 +35,7 @@ module dithering_loop_control(
     always_comb 
     begin : next_state_condition 
         unique case(state)
+        // this is implemented for correctness
             RESET: begin 
                 next_state = WAIT;
             end 
@@ -46,13 +51,20 @@ module dithering_loop_control(
                 next_state = COMPARE_AND_STORE_NEW; 
             end 
             COMPARE_AND_STORE_NEW:begin 
-                next_state = COMPUTE_FINAL; 
+                next_state = COMPUTE_FINAL_E; 
             end
-            COMPUTE_FINAL:begin 
-                next_state = STORE_OLD_P; // this is implemented for correctness
-                // next_state = WAIT; // this is implemented when we want speed 
+            COMPUTE_FINAL_E:begin 
+                next_state = COMPUTE_FINAL_SW; 
             end 
-
+            COMPUTE_FINAL_SW:begin 
+                next_state = COMPUTE_FINAL_S;
+            end  
+            COMPUTE_FINAL_S:begin 
+                next_state = COMPUTE_FINAL_SE; 
+            end 
+            COMPUTE_FINAL_SE:begin 
+                next_state = WAIT; 
+            end 
         endcase 
     
     end 
@@ -62,7 +74,7 @@ module dithering_loop_control(
         reset_dithering = 1'b0; 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 
-        compute_fin = 1'b0; 
+        compute_fin = 4'b0000;
         unique case(state)
             RESET: begin 
                 reset_dithering = 1'b1; 
@@ -76,8 +88,17 @@ module dithering_loop_control(
             COMPARE_AND_STORE_NEW:begin 
                 compare_and_store_n = 1'b1; 
             end
-            COMPUTE_FINAL:begin 
-                compute_fin = 1'b1; 
+            COMPUTE_FINAL_E:begin 
+                compute_fin = 4'b0001;
+            end 
+            COMPUTE_FINAL_SW:begin 
+                compute_fin = 4'b0010;
+            end  
+            COMPUTE_FINAL_S:begin 
+                compute_fin = 4'b0100;
+            end 
+            COMPUTE_FINAL_SE:begin 
+                compute_fin = 4'b1000; 
             end 
 
         endcase 

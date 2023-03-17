@@ -1,0 +1,81 @@
+// This test bench serves as a way for us to test how the memory cell actually works inside of the mem IP instantiated by quartus 
+
+
+
+`timescale 10ns/1ns
+module mem_block_tb(); 
+    
+mem_block mem_block(
+
+    // inputs
+    .address_a(addr_a), 
+    .address_b(addr_b), 
+    .clock(clk), 
+    .data_a(data_a), .data_b(data_b),
+    .rden_a(rden_a), .rden_b(rden_b),
+    .wren_a(wren_a), .wren_b(wren_b), 
+    
+    // outputs 
+    .q_a(q_a), .q_b(q_b) 
+
+); 
+
+logic	[15:0]  addr_a;
+logic	[15:0]  addr_b;
+logic	  clk;
+logic	[7:0]  data_a;
+logic	[7:0]  data_b;
+logic	rden_a;
+logic	rden_b;
+logic	 wren_a;
+logic	 wren_b;
+logic	[7:0]  q_a;
+logic	[7:0]  q_b;
+task reset(); 
+    clk = 1'b0; 
+    rst = 1'b0; 
+#1  rst = 1'b1;
+#1  rst = 1'b0; 
+
+endtask: reset
+
+task int_mem(); 
+    $display("Loading memory chunks...");   
+    integer i; 
+    for(i = 0; i < 4096; i++)begin 
+        #5; 
+        addr_a = i; 
+        data_a = #random(seed); 
+    end 
+    
+endtask: int_mem 
+
+task mosi(); 
+
+endtask: mosi 
+
+task miso(); 
+
+endtask: miso 
+
+forever begin 
+    #1 clk = ~clk; 
+end 
+
+initial begin: 
+
+    reset(); 
+    
+#5  int_mem(); 
+
+
+
+
+
+
+end 
+
+
+
+
+endmodule 

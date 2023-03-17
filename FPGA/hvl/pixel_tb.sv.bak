@@ -1,0 +1,54 @@
+`timescale 10ns/1ns
+module pixel_tb(); 
+    
+pixel_algorithm_unit p0(
+    // input 
+    .clk(clk), .rst(rst) // clk-rst itf 
+    .color(color), 
+    // ouput 
+    .color(color_out)
+); 
+
+task reset(); 
+    clk = 1'b0; 
+    rst = 1'b0; 
+#1  rst = 1'b1;
+#1  rst = 1'b0; 
+
+endtask: reset
+
+task int_mem(); 
+    $display("Loading memory chunks..."); 
+    
+    
+endtask: int_mem 
+
+task mosi(); 
+
+endtask: mosi 
+
+task miso(); 
+
+endtask: miso 
+
+forever begin 
+    #1 clk = ~clk; 
+end 
+
+initial begin: 
+
+    reset(); 
+    
+#5  int_mem(); 
+
+
+
+
+
+
+end 
+
+
+
+
+endmodule 

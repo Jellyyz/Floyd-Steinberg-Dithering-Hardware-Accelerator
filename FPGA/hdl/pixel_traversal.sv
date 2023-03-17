@@ -11,23 +11,23 @@ parameter RGB_SIZE = 8)
 
 (
     input logic clk, rst, 
-    output logic [15:0] pixel_sweeper
+    input logic counter_en, 
+    output logic [31:0] counter, 
+    output logic [15:0] pixel_sweeper,
+    output logic one_s
 ); 
 
 
 
-logic [31:0] counter; 
-logic one_s; 
 
 always_ff @(posedge clk or posedge rst) begin : COUNTER_ONE_S
     if(rst)begin 
         counter <= '0; 
     end 
-    else if (counter > 32'd50000000)begin 
+    else if (counter == IMAGE_SIZE - 1) begin 
         counter <= '0; 
     end 
-
-    else begin 
+    else if(counter_en) begin 
         counter <= counter + 1'b1;                 
     end 
 end 

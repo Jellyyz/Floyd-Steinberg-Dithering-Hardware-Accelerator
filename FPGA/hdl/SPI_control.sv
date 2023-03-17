@@ -42,6 +42,9 @@ module SPI_control(
 	
 	always_comb
 	begin: STATE_CONTROL
+
+	next_state = curr_state; 
+	
 		unique case (curr_state)
 			RESET: begin
 				next_state = LOAD;
@@ -78,8 +81,8 @@ module SPI_control(
 	always_ff @ (posedge SPI_CLK) begin
 		unique case (curr_state)
 			RESET: begin
-				received_shifts <= 4'h0;
-				received_ptr <= 8'h0;
+				received_shifts <= '0;
+				received_ptr <= '0;
 				SPI_MISO <= 1'bZ;
 			end
 			
