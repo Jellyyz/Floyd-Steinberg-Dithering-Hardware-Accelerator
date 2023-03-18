@@ -75,31 +75,17 @@ module TopLevel
 
 	logic [(RGB_SIZE - 1):0] ram_out, color_out;
 
-	TopLevel_control top_control(
-		// input 
-		.clk(MAX10_CLK1_50), .rst(rst), 
-		.done_compute(done_compute),
-
-		// output 
-		.LD_RAM(LD_RAM),
-		.RD_RAM(RD_RAM),
-		.WR_RAM_ADDR(WR_RAM_ADDR), 
-		.RD_RAM_ADDR(RD_RAM_ADDR)
-
-	); 
+	
 	pixel_algorithm_unit gray(
 		// input 
 		.clk(MAX10_CLK1_50), 
-		.rst(rst),
-		.color({8{SPI_MOSI}}),
-		.LD_RAM(LD_RAM), 
-		.RD_RAM(RD_RAM),
-		.WR_RAM_ADDR(WR_RAM_ADDR), 
-		.RD_RAM_ADDR(RD_RAM_ADDR),
+		.rst(rst)
 
 		// output 
-		.color_out(color_out),
-		.done_compute(done_compute)
+
+
+
+
 	);
 	
 	// SPI_control SPI_control(

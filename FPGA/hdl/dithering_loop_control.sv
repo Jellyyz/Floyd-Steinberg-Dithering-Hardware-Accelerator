@@ -1,23 +1,63 @@
-module dithering_loop_control(
+// This state machine helps drive the pixel accelerator in lieu of a pipelined design 
+
+module dithering_loop_control
+# (
+	parameter CLOCK_SPEED = 50000000,
+	parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
+	parameter IMAGEY = 64,
+	parameter IMAGEX = 64,
+	parameter IMAGE_SIZE = IMAGEY * IMAGEX,
+	parameter IMAGEYlog2 = $clog2(IMAGEY), 
+	parameter IMAGEXlog2 = $clog2(IMAGEX),
+	parameter IMAGE_ADDR_WIDTH = $clog2(IMAGE_SIZE),
+	parameter RGB_SIZE = 8,
+	parameter IMAGESIZElog2idx = ($clog2(IMAGE_SIZE) - 1),
+	parameter ADJ_PIXELS = 4
+) 
+(
     input logic clk, rst, 
     input logic algorithm_trigger, 
+    input logic MCU_TX_RDY, 
 
+    output logic rden_a, rden_b, 
+    output logic wren_a, wren_b, 
+    output logic MCU_RX_RDY, 
     output logic reset_dithering, 
     output logic store_old_p,
     output logic compare_and_store_n, 
-    output logic [3:0] compute_fin
+    output logic [3:0] compute_fin, 
+    output logic [IMAGE_ADDR_WIDTH - 1:0] png_idx  
 
 ); 
+
+logic png_counter_en; 
+logic [IMAGE_ADDR_WIDTH - 1:0] pixel_sweeper; 
+logic pixel_traversal_rst; 
+logic full_png_idx; 
+// use pixel_traversal module in order to keep track of where we are in the image 
+pixel_traversal pixel_traversal(
+
+    .clk(clk), .rst(pixel_traversal_rst), 
+    .counter_en(png_counter_en), .counter(png_idx), 
+
+);
+
+
+
     // declaration of all states 
-    enum logic [4:0]{
+    enum logic [3:0]{
         RESET, 
-        WAIT,
-        STORE_OLD_P, 
-        COMPARE_AND_STORE_NEW,
-        COMPUTE_FINAL_E, 
-        COMPUTE_FINAL_SW,
-        COMPUTE_FINAL_S, 
-        COMPUTE_FINAL_SE 
+        WAIT_FOR_MCU,
+        S1_STORE_IMAGE_SRAM, 
+
+        S2_STORE_OLD_P, 
+        S2_COMPARE_AND_STORE_NEW,
+        S2_COMPUTE_FINAL_E, 
+        S2_COMPUTE_FINAL_SW,
+        S2_COMPUTE_FINAL_S, 
+        S2_COMPUTE_FINAL_SE, 
+
+        S3_LOAD_IMAGE_SRAM 
     
 
     } state, next_state; 
@@ -34,36 +74,53 @@ module dithering_loop_control(
 
     always_comb 
     begin : next_state_condition 
+        next_state = state; 
         unique case(state)
-        // this is implemented for correctness
+        // this is implemented for correctness - non-pipelined implementation
             RESET: begin 
-                next_state = WAIT;
+                next_state = WAIT_FOR_MCU;
             end 
-            WAIT:begin 
-                if(algorithm_trigger)begin 
-                    next_state = STORE_OLD_P; 
+            WAIT_FOR_MCU:begin 
+                // the mcu sends this signal to signify that it is ready to send out some data 
+                if(MCU_TX_RDY)begin 
+                    next_state = S1_STORE_IMAGE_SRAM; 
                 end 
+            end 
+            S1_STORE_IMAGE_SRAM:begin 
+                // once the FPGA detects that the signal is deasserted then we can start on S2 
+                if(full_png_idx)begin 
+                    next_state = S2_STORE_OLD_P; 
+                end 
+            end 
+            S2_STORE_OLD_P:begin 
+                // if the computation is done then we can move on to the reading back from the FPGA
+                if(full_png_idx)begin 
+                    next_state = S3_LOAD_IMAGE_SRAM; 
+                end 
+                // else continue reading all the pixels 
                 else begin 
-                    next_state = WAIT; 
+                    next_state = S2_COMPARE_AND_STORE_NEW; 
                 end 
             end 
-            STORE_OLD_P:begin 
-                next_state = COMPARE_AND_STORE_NEW; 
-            end 
-            COMPARE_AND_STORE_NEW:begin 
-                next_state = COMPUTE_FINAL_E; 
+            S2_COMPARE_AND_STORE_NEW:begin 
+                next_state = S2_COMPUTE_FINAL_E; 
             end
-            COMPUTE_FINAL_E:begin 
-                next_state = COMPUTE_FINAL_SW; 
+            S2_COMPUTE_FINAL_E:begin 
+                next_state = S2_COMPUTE_FINAL_SW; 
             end 
-            COMPUTE_FINAL_SW:begin 
-                next_state = COMPUTE_FINAL_S;
+            S2_COMPUTE_FINAL_SW:begin 
+                next_state = S2_COMPUTE_FINAL_S;
             end  
-            COMPUTE_FINAL_S:begin 
-                next_state = COMPUTE_FINAL_SE; 
+            S2_COMPUTE_FINAL_S:begin 
+                next_state = S2_COMPUTE_FINAL_SE; 
             end 
-            COMPUTE_FINAL_SE:begin 
-                next_state = WAIT; 
+            S2_COMPUTE_FINAL_SE:begin 
+                next_state = S2_STORE_OLD_P; 
+            end 
+            S3_LOAD_IMAGE_SRAM:begin 
+                if(full_png_idx)begin 
+                    next_state = WAIT_FOR_MCU; 
+                end 
             end 
         endcase 
     
@@ -71,37 +128,53 @@ module dithering_loop_control(
 
     always_comb 
     begin : state_condition 
-        reset_dithering = 1'b0; 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 
         compute_fin = 4'b0000;
+        MCU_RX_RDY = 1'b0; 
         unique case(state)
             RESET: begin 
                 reset_dithering = 1'b1; 
             end 
-            WAIT:begin 
+            WAIT_FOR_MCU:begin 
                 // wait for a signal from the user
             end 
-            STORE_OLD_P:begin 
+            S1_STORE_IMAGE_SRAM:begin 
+
+            end 
+            S2_STORE_OLD_P:begin 
                 store_old_p = 1'b1; 
             end 
-            COMPARE_AND_STORE_NEW:begin 
+            S2_COMPARE_AND_STORE_NEW:begin 
                 compare_and_store_n = 1'b1; 
             end
-            COMPUTE_FINAL_E:begin 
+            S2_COMPUTE_FINAL_E:begin 
                 compute_fin = 4'b0001;
             end 
-            COMPUTE_FINAL_SW:begin 
+            S2_COMPUTE_FINAL_SW:begin 
                 compute_fin = 4'b0010;
             end  
-            COMPUTE_FINAL_S:begin 
+            S2_COMPUTE_FINAL_S:begin 
                 compute_fin = 4'b0100;
             end 
-            COMPUTE_FINAL_SE:begin 
+            S2_COMPUTE_FINAL_SE:begin 
                 compute_fin = 4'b1000; 
+            end 
+            S3_LOAD_IMAGE_SRAM:begin 
+                MCU_RX_RDY = 1'b1; 
             end 
 
         endcase 
     end 
 
+    always_comb begin 
+        
+        full_png_idx = (png_idx == (IMAGE_SIZE - 1));    
+
+        rden_a = store_old_p || MCU_RX_RDY 
+        wren_a = MCU_TX_RDY || compare_and_store_n || 
+        png_counter_en = MCU_TX_RDY || (compute_fin[3]) || ; 
+        pixel_traversal_rst = rst || (MCU_TX_RDY && full_png_idx) || (MCU_RX_RDY && full_png_idx);
+
+    end 
 endmodule 

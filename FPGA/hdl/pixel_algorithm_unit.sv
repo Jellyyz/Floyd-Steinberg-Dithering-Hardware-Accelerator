@@ -12,7 +12,6 @@ module pixel_algorithm_unit
 	parameter IMAGEXlog2 = $clog2(IMAGEX),
 	parameter IMAGE_ADDR_WIDTH = $clog2(IMAGE_SIZE),
 	parameter RGB_SIZE = 8,
-	parameter IMAGESIZElog2idx = ($clog2(IMAGE_SIZE) - 1),
 	parameter ADJ_PIXELS = 4
 ) 
  
@@ -21,11 +20,15 @@ module pixel_algorithm_unit
     // CLk - Rst Interface
     // 50 mhz clock  
     input logic clk, rst, 
-    input logic [RGB_SIZE - 1:0] color,
-    input logic LD_RAM, RD_RAM, 
-    input logic [IMAGE_ADDR_WIDTH - 1:0] WR_RAM_ADDR, RD_RAM_ADDR,
-    output logic [RGB_SIZE - 1:0] color_out,
-    output logic done_compute 
+
+
+
+
+
+
+
+
+
 ); 
 
 // wikipedia formula :     
@@ -46,8 +49,8 @@ module pixel_algorithm_unit
 // adapted version for our hardware 
 // for i until image size
 //     state 1 old <= sram[x][y]
-//     state 2 sram[x][y] <= closest_pixel 
-//     state 2 quant_error <= old - closest_pixel 
+//     state 2 sram[x][y] <= closest_pixel(old) 
+//     state 2 quant_error <= old - closest_pixel(old) 
 //     state 3 sram[x + 1][y] <= sram[x + 1][y] + ((quant_error >> 4) * 7)
 //     state 4 sram[x - 1][y + 1] <= sram[x - 1][y + 1] + ((quant_error >> 4) * 3)
 //     state 5 sram[x][y + 1] <= sram[x][y + 1] + ((quant_error >> 4) * 5)
@@ -59,44 +62,92 @@ module pixel_algorithm_unit
 // on state 6 [x][y] must ++
 // on state 1 store sram pixel_traversal into old, also store sramse buffer into sram again 
 // repeat 
+
+    // control signals 
     logic reset_dithering;
     logic store_old_p;
     logic compare_and_store_n;
 
     logic [3:0] compute_fin;
-    logic [IMAGESIZElog2idx:0] pixel_sweeper;
-    logic [RGB_SIZE - 1:0] ram_out; 
-	logic [IMAGE_ADDR_WIDTH - 1:0] ram_rd_addr, ram_wr_addr;
-    assign done_compute = compute_fin; 
+    logic [IMAGE_ADDR_WIDTH - 1:0] png_idx;
+    
+    // used by the SRAM 
+    logic [15:0] address_a, address_b; // @TODO: maybe change to be parameterizable? 
+    logic [RGB_SIZE - 1:0] data_a, data_b, q_a, q_b;
+    logic rden_a, rden_b; 
+    logic wren_a, wren_b; 
 
     mem_block pixel_sram(
         // inputs
-        .address_a(), 
-        .address_b(), 
-        .clock(), 
-        .data_a(), .data_b(),
-        .rden_a(), .rden_b(),
-        .wren_a(), .wren_b(), 
+        .address_a(address_a), 
+        .address_b(address_b), 
+        .clock(clk), 
+        .data_a(data_a), .data_b(data_b),
+        .rden_a(rden_a), .rden_b(rden_b),
+        .wren_a(wren_a), .wren_b(wren_b), 
         
         // outputs 
-        .q_a(), .q_b() 
+        .q_a(q_a), .q_b(q_b) 
     );
     dithering_loop_control control0(
 
         // CLk - Rst Interface
         .clk(clk), .rst(rst),
 
-        // control singals 
+        // control signals 
+        .rden_a(rden_a), .rden_b(rden_b),
+        .wren_a(wren_a), .wren_b(wren_b), 
+        
         .reset_dithering(reset_dithering), 
         .store_old_p(store_old_p),
         .compare_and_store_n(compare_and_store_n),  
-        .compute_fin(compute_fin)
+        .compute_fin(compute_fin),
+        .png_idx(png_idx) 
     ); 
 
-    pixel_traversal pix_trav0(
-        .clk(clk), .rst(rst), 
-        .pixel_sweeper(pixel_sweeper)
-    ); 
+    always_comb begin: ADDR_A 
+    
+    end 
+
+    always_comb begin: ADDR_B 
+    
+    end 
+
+    always_comb begin: DATA_A 
+    
+    end 
+
+    always_comb begin: DATA_B 
+    
+    end 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // temporarily store the 4 adjacent sram data into here 
     logic [RGB_SIZE - 1:0] png_data_color_buffer [ADJ_PIXELS];
 
@@ -121,43 +172,15 @@ module pixel_algorithm_unit
     logic [IMAGE_SIZE:0] pixel_sweeper_s; 
     logic [IMAGE_SIZE:0] pixel_sweeper_se; 
 
-    always_comb begin: PIXEL_SWEEPER_CALC
-        pixel_sweeper_e = pixel_sweeper + 1'b1; 
-        pixel_sweeper_sw = pixel_sweeper + (IMAGEY - 1); 
-        pixel_sweeper_s = pixel_sweeper + (IMAGEY); 
-        pixel_sweeper_se = pixel_sweeper + (IMAGEY + 1); 
-    end 
-    always_comb begin: READ_RAM_ADDR_AND_DATA_OUT
-        if(store_old_p || compare_and_store_n)begin 
-            ram_rd_addr = pixel_sweeper;
-        end    
-    end
-    always_comb begin: WRITE_RAM_ADDR_AND_DATA_IN 
-        unique case(compute_fin)
-            4'b0001:begin 
-                ram_rd_addr = pixel_sweeper_e; 
-            end 
-            4'b0010:begin 
-                ram_rd_addr = pixel_sweeper_sw; 
-            end
-            4'b0100:begin 
-                ram_rd_addr = pixel_sweeper_s; 
-            end
-            4'b1000:begin 
-                ram_rd_addr = pixel_sweeper_se;
-            end 
-            4'b0000:begin 
-                ram_rd_addr = pixel_sweeper; 
-            end 
-        endcase 
-    end  
+
+ 
     always_ff @(posedge clk or posedge rst) begin : OLD_PIXEL_REG
 
         if(rst) begin 
             png_data_color_buffer_old <= '0; 
         end 
         else if(store_old_p) begin 
-            png_data_color_buffer_old <= ram_out;
+            png_data_color_buffer_old <= q_a;
         end 
     end
 
