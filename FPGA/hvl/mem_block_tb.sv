@@ -91,8 +91,11 @@ initial begin: TEST_VECTORS
         rden_a = 1'b0; 
         rden_b = 1'b0; 
 
-#10;   
-        for (i = 0; i < (8 * 64 * 64); i++)begin  
+#9;   
+
+// ---------------------------- Tests to understand how basic memory works ---------------------------------
+        // // I is used as an address to iterate through a 64x64 image. This fills up half of the memory.
+        // for (i = 0; i < (8 * 64 * 64); i++)begin  
             // --------------- READING AND WRITING BOTH FROM A -------------------------------------
             // #1;
             // // memory writesA
@@ -108,23 +111,49 @@ initial begin: TEST_VECTORS
             // #1;
             // rden_a = 1'b0; 
             // ---------------  WRITING TO A AND THEN READING FROM B -------------------------------
-            #1;
-            // memory writesA
-            wren_a = 1'b1;   
-            write_memA(($urandom % (2**8 - 1)), i);     
-            #1;
-            wren_a = 1'b0;
+            // #1;
+            // // memory writesA
+            // wren_a = 1'b1;   
+            // write_memA(($urandom % (2**8 - 1)), i);     
+            // #1;
+            // wren_a = 1'b0;
             
-            // memory readsA
-            #0;
-            rden_b = 1'b1; 
-            read_memB(i, recieved_b);
+            // // memory readsA
+            // #1;                 // must have a clock cycle delay after writing before accessing again .
+            // rden_b = 1'b1; 
+            // read_memB(i, recieved_b);
+            // #1;
+            // rden_b = 1'b0; 
+
+
+// --------------- Simulating Filling Up SRAM with Data and ITF -------------------------
+        // I is used as an address to iterate through a 64x64 image. This fills up half of the memory.
+        wren_a = 1'b1; 
+        for (i = 0; i < (8 * 4 * 4); i++)begin  
+            // Fill up SRAM through DataA
+            write_memA(($urandom % (2**8 - 1)), i);  
+            #2;
+            
+        end 
+        wren_a = 1'b0; 
+
+        #1;
+
+        for (i = 0; i < (8 * 4 * 4); i++)begin  
+            #1; 
+            rden_a = 1'b1; 
+            rden_b = 1'b1;
+            // Read Memory from Q port A 
+            read_memA(i, recieved_a); 
+            // Read Memory from Q port B
+            read_memB(i + 2, recieved_b);  
             #1;
-            rden_b = 1'b0; 
-
-
+            rden_a = 1'b0; 
+            rden_b = 1'b0;
+            
         end 
 
+    
 
 
 
