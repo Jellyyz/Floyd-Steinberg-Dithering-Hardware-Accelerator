@@ -1,4 +1,6 @@
 // This test bench serves as a way for us to test how the memory cell actually works inside of the mem IP instantiated by quartus 
+// Copyright ECE445 2023 
+// By Gally Huang 
 module mem_block_tb(); 
 timeunit 10ns;	// Half clock cycle at 50 MHz
 			// This is the amount of time represented by #1 

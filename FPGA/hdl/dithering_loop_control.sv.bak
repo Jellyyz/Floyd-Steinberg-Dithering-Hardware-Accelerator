@@ -32,44 +32,13 @@ logic png_counter_en;
 logic [IMAGE_ADDR_WIDTH - 1:0] pixel_sweeper; 
 logic pixel_traversal_rst; 
 logic full_png_idx; 
-logic store_sram; 
 // use pixel_traversal module in order to keep track of where we are in the image 
 pixel_traversal pixel_traversal(
 
-    .clk(clk), .rst(pixel_traversal_rst || rst), 
-    .counter_en(png_counter_en), .counter(png_idx)
+    .clk(clk), .rst(pixel_traversal_rst), 
+    .counter_en(png_counter_en), .counter(png_idx), 
 
 );
-
-    always_ff @(posedge clk) begin : WRITE_ENABLEA
-        if(rst)begin 
-            wren_a <= 1'b0;
-        end 
-        // when two back from the images begin loaded in we can start to stop writing to sram 
-        else if((png_idx == (IMAGE_SIZE - 1)))begin
-            wren_a <= 1'b0; 
-        end 
-        else if(compute_fin[3])begin
-            wren_a <= 1'b0;  
-        end
-        else begin 
-            if(MCU_TX_RDY)begin 
-                wren_a <= 1'b1;
-            end
-            else if(compare_and_store_n)begin
-                wren_a <= 1'b1;
-            end 
-            
-        end 
-    end 
-    always_ff @ (posedge clk or posedge rst) begin : FULL_PNG_IDX
-        if(rst) begin 
-            full_png_idx <= 1'b0; 
-        end 
-        else begin
-            full_png_idx <= (png_idx == (IMAGE_SIZE - 1));    
-        end 
-    end 
 
 
 
@@ -101,7 +70,6 @@ pixel_traversal pixel_traversal(
 
     end 
 
-
     always_comb 
     begin : next_state_condition 
         next_state = state; 
@@ -123,7 +91,14 @@ pixel_traversal pixel_traversal(
                 end 
             end 
             S2_STORE_OLD_P:begin 
-                next_state = S2_COMPARE_AND_STORE_NEW; 
+                // if the computation is done then we can move on to the reading back from the FPGA
+                if(full_png_idx)begin 
+                    next_state = S3_LOAD_IMAGE_SRAM; 
+                end 
+                // else continue reading all the pixels 
+                else begin 
+                    next_state = S2_COMPARE_AND_STORE_NEW; 
+                end 
             end 
             S2_COMPARE_AND_STORE_NEW:begin 
                 next_state = S2_COMPUTE_FINAL_E; 
@@ -138,14 +113,7 @@ pixel_traversal pixel_traversal(
                 next_state = S2_COMPUTE_FINAL_SE; 
             end 
             S2_COMPUTE_FINAL_SE:begin 
-                // if the computation is done then we can move on to the reading back from the FPGA
-                if(full_png_idx)begin 
-                    next_state = S3_LOAD_IMAGE_SRAM; 
-                end 
-                // else continue to store new pixels
-                else begin 
-                    next_state = S2_STORE_OLD_P; 
-                end 
+                next_state = S2_STORE_OLD_P; 
             end 
             S3_LOAD_IMAGE_SRAM:begin 
                 if(full_png_idx)begin 
@@ -156,14 +124,12 @@ pixel_traversal pixel_traversal(
     
     end 
 
-    always_comb begin : state_condition 
+    always_comb 
+    begin : state_condition 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 
         compute_fin = 4'b0000;
-        MCU_RX_RDY = 1'b0;
-        store_sram = 1'b0; 
-		reset_dithering = 1'b0; 
-        pixel_traversal_rst = 1'b0; 
+        MCU_RX_RDY = 1'b0; 
         unique case(state)
             RESET: begin 
                 reset_dithering = 1'b1; 
@@ -172,10 +138,7 @@ pixel_traversal pixel_traversal(
                 // wait for a signal from the user
             end 
             S1_STORE_IMAGE_SRAM:begin 
-                if(full_png_idx) begin 
-                    pixel_traversal_rst = 1'b1; 
-                end 
-                store_sram = 1'b1; 
+
             end 
             S2_STORE_OLD_P:begin 
                 store_old_p = 1'b1; 
@@ -193,8 +156,6 @@ pixel_traversal pixel_traversal(
                 compute_fin = 4'b0100;
             end 
             S2_COMPUTE_FINAL_SE:begin 
-                if(full_png_idx) 
-                    pixel_traversal_rst = 1'b1; 
                 compute_fin = 4'b1000; 
             end 
             S3_LOAD_IMAGE_SRAM:begin 
@@ -206,15 +167,12 @@ pixel_traversal pixel_traversal(
 
     always_comb begin 
         
+        full_png_idx = (png_idx == (IMAGE_SIZE - 1));    
 
-        rden_a = store_old_p || MCU_RX_RDY || compute_fin != '0;
-        png_counter_en = (wren_a && store_sram) || (compute_fin[3]) || MCU_RX_RDY;   // enable pxl address traversal in sram  
-                                                                     // s1
-                                                                     // last step of s2
-        
+        rden_a = store_old_p || MCU_RX_RDY;
+        wren_a = MCU_TX_RDY || compare_and_store_n;
+        png_counter_en = MCU_TX_RDY || (compute_fin[3]) || ; 
+        pixel_traversal_rst = rst || (MCU_TX_RDY && full_png_idx) || (MCU_RX_RDY && full_png_idx);
+
     end 
-
-
-
-
 endmodule 

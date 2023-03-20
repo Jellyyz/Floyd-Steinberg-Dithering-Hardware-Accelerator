@@ -82,6 +82,7 @@ module TopLevel
 	
 	pixel_algorithm_unit #(
 		.CLOCK_SPEED(CLOCK_SPEED),
+		.PIXEL_COUNTER(PIXEL_COUNTER), 
 		.IMAGEX(IMAGEX), .IMAGEY(IMAGEY), 
 		.IMAGE_SIZE(IMAGE_SIZE),
 		.IMAGEXlog2(IMAGEXlog2), .IMAGEYlog2(IMAGEYlog2),
@@ -93,7 +94,7 @@ module TopLevel
 		// input 
 		.clk(MAX10_CLK1_50), 
 		.rst(rst),
-		.external_SPI_data(external_SPI_data),
+		.external_SPI_data(external_SPI_data)
 		.MCU_TX_RDY(MCU_TX_RDY), 
 
 		// output 

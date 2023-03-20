@@ -26,15 +26,7 @@ module pixel_algorithm_unit
 
 
     ); 
-    
-    // contains the old pixel - reg 
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_old; 
 
-    // closest pixel to old pixel - some wire 
-    logic [RGB_SIZE - 1:0] png_data_color_closest; 
-
-    // quant_error - reg 
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_q_error; 
 // wikipedia formula :     
 // for each y from top to bottom do
 //     for each x from left to right do
@@ -87,7 +79,7 @@ module pixel_algorithm_unit
         .address_b(address_b), 
         .clock(clk), 
         .data_a(data_a), .data_b(data_b),
-        .rden_a(rden_a), .rden_b(rden_b),
+        .rden_a(rden_a), .rden_b(rden_b),9
         .wren_a(wren_a), .wren_b(wren_b), 
         
         // outputs 
@@ -129,12 +121,7 @@ module pixel_algorithm_unit
     end 
 
     always_comb begin: DATA_A 
-        if(compare_and_store_n) begin 
-            data_a = png_data_color_closest; 
-        end 
-        else begin 
-            data_a = external_SPI_data;
-        end 
+        data_a = external_SPI_data;
     end 
 
     always_comb begin: DATA_B 
@@ -171,7 +158,14 @@ module pixel_algorithm_unit
     // temporarily store the 4 adjacent sram data into here 
     logic [RGB_SIZE - 1:0] png_data_color_buffer [ADJ_PIXELS];
 
+    // contains the old pixel - reg 
+    logic [RGB_SIZE - 1:0] png_data_color_buffer_old; 
 
+    // closest pixel to old pixel - some wire 
+    logic [RGB_SIZE - 1:0] png_data_color_closest; 
+
+    // quant_error - reg 
+    logic [RGB_SIZE - 1:0] png_data_color_buffer_q_error; 
 
     // the correct "new" RGB value of the png_data (wire connecting to the register unit)
     logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_e;
@@ -180,17 +174,13 @@ module pixel_algorithm_unit
     logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_se;
 
     // temp values that have the correct current indexing for the pixel counter 
-    // logic [IMAGE_SIZE:0] pixel_sweeper_e; 
-    // logic [IMAGE_SIZE:0] pixel_sweeper_sw; 
-    // logic [IMAGE_SIZE:0] pixel_sweeper_s; 
-    // logic [IMAGE_SIZE:0] pixel_sweeper_se; 
+    logic [IMAGE_SIZE:0] pixel_sweeper_e; 
+    logic [IMAGE_SIZE:0] pixel_sweeper_sw; 
+    logic [IMAGE_SIZE:0] pixel_sweeper_s; 
+    logic [IMAGE_SIZE:0] pixel_sweeper_se; 
 
 
  
-    always_comb begin: CLOSEST_AND_QUANT_CALC
-        png_data_color_closest = (png_data_color_buffer_old >= 128) ? 8'b11111111 : 8'h0; 
-    end
-
     always_ff @(posedge clk or posedge rst) begin : OLD_PIXEL_REG
 
         if(rst) begin 
@@ -212,33 +202,36 @@ module pixel_algorithm_unit
 
     end 
 
-    // logic [RGB_SIZE - 1:0] png_quant_div_16; 
+    logic [RGB_SIZE - 1:0] png_quant_div_16; 
 
-    // always_comb begin : COMPUTE_PIXELS
+    always_comb begin : COMPUTE_PIXELS
         
-    //     // " logic [x] name [y];" you index it this way "name[y][x]"
+        // " logic [x] name [y];" you index it this way "name[y][x]"
    
 
-    //     png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
-    //     // account for going out of bounds
-    //     if(pixel_sweeper_e != (IMAGEX - 1'b1)) begin 
-    //         png_data_color_buffer_sweeped_e = png_data_color_buffer[pixel_sweeper_e][(RGB_SIZE-1):0] + ((png_quant_div_16) * 3'b111);
-    //     end 
-    //     // Left cnd: True if pixel_sweeper not on bottom row
-    //     if (pixel_sweeper < (IMAGE_SIZE - IMAGEY)) begin
-    //         // SW : Can do it if pixel_sweeper not on leftmost column (modulo IMAGEX != 0)
-    //         if (pixel_sweeper != '0) begin
-    //             png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se][(RGB_SIZE-1):0] + ((png_quant_div_16) * 2'b11); 
-    //         end
-    //         // S : Can do it if got inside this loop 
-    //         png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + ((png_quant_div_16) * 3'b101); 
-    //         // SE : Can do it if pixel_sweeper not on rightmost column (modulo IMAGEX != IMAGEX - 1)
-    //         if (pixel_sweeper != (IMAGEX - 1'b1)) begin
-    //             png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw][(RGB_SIZE-1):0] + (png_quant_div_16); 
-    //         end
-    //     end  
-    // end 
+        png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
+        // account for going out of bounds
+        if(pixel_sweeper_e != (IMAGEX - 1'b1)) begin 
+            png_data_color_buffer_sweeped_e = png_data_color_buffer[pixel_sweeper_e][(RGB_SIZE-1):0] + ((png_quant_div_16) * 3'b111);
+        end 
+        // Left cnd: True if pixel_sweeper not on bottom row
+        if (pixel_sweeper < (IMAGE_SIZE - IMAGEY)) begin
+            // SW : Can do it if pixel_sweeper not on leftmost column (modulo IMAGEX != 0)
+            if (pixel_sweeper != '0) begin
+                png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se][(RGB_SIZE-1):0] + ((png_quant_div_16) * 2'b11); 
+            end
+            // S : Can do it if got inside this loop 
+            png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + ((png_quant_div_16) * 3'b101); 
+            // SE : Can do it if pixel_sweeper not on rightmost column (modulo IMAGEX != IMAGEX - 1)
+            if (pixel_sweeper != (IMAGEX - 1'b1)) begin
+                png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw][(RGB_SIZE-1):0] + (png_quant_div_16); 
+            end
+        end  
+    end 
 
+    always_comb begin: CLOSEST_AND_QUANT_CALC
+        png_data_color_closest = (png_data_color_buffer_old >= 128) ? 8'b11111111 : 8'h0; 
+    end
 
     //  x x x x
     //  x x x x
