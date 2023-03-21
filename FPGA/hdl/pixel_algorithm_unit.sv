@@ -34,7 +34,7 @@ module pixel_algorithm_unit
     logic [RGB_SIZE - 1:0] png_data_color_closest; 
 
     // quant_error - reg 
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_q_error; 
+    logic [15:0] png_data_color_buffer_q_error; 
 // wikipedia formula :     
 // for each y from top to bottom do
 //     for each x from left to right do
@@ -49,20 +49,20 @@ module pixel_algorithm_unit
 
 
 
-
+ 
 // adapted version for our hardware 
 // for i until image size
-//     state 1 old <= sram[x][y]
-//     state 2 sram[x][y] <= closest_pixel(old) 
-//     state 2 quant_error <= old - closest_pixel(old) 
+//     state 1 old <= sram[x][y]                                            store_old_P                        rden_a = 1'b1  wren_a = 1'b0; 
+//     state 2 sram[x][y] <= closest_pixel(old)                             compare_and_store_N                rden_a = 1'b0  wren_a = 1'b1;              
+//     state 2 quant_error <= old - closest_pixel(old)                      compare_and_store_N                rden_a = 1'bX  wren_a = 1'bX;            
 //     state 3 sram[x + 1][y] <= sram[x + 1][y] + ((quant_error >> 4) * 7)
 //     state 4 sram[x - 1][y + 1] <= sram[x - 1][y + 1] + ((quant_error >> 4) * 3)
 //     state 5 sram[x][y + 1] <= sram[x][y + 1] + ((quant_error >> 4) * 5)
 //     state 6 sram[x + 1][y + 1] <= sram[x + 1][y + 1] + (quant_error >> 4)    
-// on state 3 read srame and store into buffer
-// on state 4 read sramsw and store into buffer, also store srame buffer into sram again 
-// on state 5 read srams and store into buffer, also store sramw buffer into sram again 
-// on state 6 read sramse and store into buffer, also store srams buffer into sram again 
+// on state 3 read srame and store into sram at e
+// on state 4 read sramsw and and store into sram at se
+// on state 5 read srams and and store into sram at s
+// on state 6 read sramse and and store into sram at sw
 // on state 6 [x][y] must ++
 // on state 1 store sram pixel_traversal into old, also store sramse buffer into sram again 
 // repeat 
@@ -81,14 +81,19 @@ module pixel_algorithm_unit
     logic rden_a, rden_b; 
     logic wren_a, wren_b; 
 
+    logic read_en_a, read_en_b; 
+    logic write_en_a, write_en_b; 
+
+    logic valid_png_idx;
+
     mem_block pixel_sram(
         // inputs
         .address_a(address_a), 
         .address_b(address_b), 
         .clock(clk), 
         .data_a(data_a), .data_b(data_b),
-        .rden_a(rden_a), .rden_b(rden_b),
-        .wren_a(wren_a), .wren_b(wren_b), 
+        .rden_a(read_en_a), .rden_b(read_en_b),
+        .wren_a(write_en_a), .wren_b(write_en_b), 
         
         // outputs 
         .q_a(q_a), .q_b(q_b) 
@@ -120,18 +125,87 @@ module pixel_algorithm_unit
         .png_idx(png_idx) 
     ); 
 
-    always_comb begin: ADDR_A 
-        address_a = png_idx; 
+    logic last_row_idx_chk; 
+    logic last_col_idx_chk; 
+    logic first_col_idx_chk;
+
+
+    logic [RGB_SIZE - 1:0] png_quant_div_16;
+    assign png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
+    assign png_data_color_closest = (png_data_color_buffer_old >= 128) ? 8'b11111111 : 8'h0; 
+
+    always_comb begin: VALID_PNG_IDX
+        // 1 is valid else 0 
+        last_row_idx_chk = (png_idx < (IMAGE_SIZE - IMAGEX)); 
+        last_col_idx_chk = ((png_idx + 1) % IMAGEX == 0);
+        first_col_idx_chk = (png_idx % IMAGEX == 0);
+
+        unique case(compute_fin)
+            4'b0001:begin // east
+                valid_png_idx = last_col_idx_chk; 
+            end 
+            4'b0010:begin // southwest 
+                valid_png_idx = first_col_idx_chk & last_row_idx_chk; 
+            end 
+            4'b0100:begin // south
+                valid_png_idx = last_row_idx_chk;           
+            end 
+            4'b1000:begin // southeast
+                valid_png_idx = last_col_idx_chk & last_row_idx_chk;  
+            end
+            default:begin // if not computing still should be less than image size
+                valid_png_idx = png_idx < IMAGE_SIZE;
+            end 
+
+        endcase 
+    
+    
+    end 
+
+    always_comb begin: ADDR_A_MUX
+        unique case(compute_fin)
+            4'b0001:begin // east
+                address_a = png_idx + 1'b1;
+            end 
+            4'b0010:begin // southwest 
+                address_a = png_idx + (IMAGEX - 1'b1);
+            end 
+            4'b0100:begin // south
+                address_a = png_idx + (IMAGEX);             
+            end 
+            4'b1000:begin // southeast
+                address_a = png_idx + (IMAGEX + 1'b1); 
+            end
+            default:begin // if not computing just use base addr 
+                address_a = png_idx; 
+            end 
+
+        endcase 
+
+
     end 
 
     always_comb begin: ADDR_B 
         address_b = '0;
     end 
 
+    // ~~~~~~~~~~~~~~~ DATA THAT IS BEING WRITTEN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     always_comb begin: DATA_A 
         if(compare_and_store_n) begin 
             data_a = png_data_color_closest; 
         end 
+        else if(compute_fin[0]) begin 
+            data_a = q_a + (png_quant_div_16 * 3'b111); 
+        end 
+        else if(compute_fin[1]) begin 
+            data_a = q_a + ((png_quant_div_16) * 2'b11); 
+        end 
+        else if(compute_fin[2]) begin 
+            data_a = q_a + ((png_quant_div_16) * 3'b101); 
+        end 
+        else if(compute_fin[3]) begin 
+            data_a = q_a + (png_quant_div_16); 
+        end
         else begin 
             data_a = external_SPI_data;
         end 
@@ -142,28 +216,13 @@ module pixel_algorithm_unit
     end 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    always_comb begin: SRAM_DATA_ACCESS_SAFETY_LOCK
+        // if pixels are not valid then block writes and reads
+        write_en_a = wren_a && valid_png_idx;
+        write_en_b = wren_b && valid_png_idx; 
+        read_en_a = 1'b1 && valid_png_idx; 
+        read_en_b = rden_b && valid_png_idx;  
+    end 
 
 
 
@@ -187,9 +246,7 @@ module pixel_algorithm_unit
 
 
  
-    always_comb begin: CLOSEST_AND_QUANT_CALC
-        png_data_color_closest = (png_data_color_buffer_old >= 128) ? 8'b11111111 : 8'h0; 
-    end
+   
 
     always_ff @(posedge clk or posedge rst) begin : OLD_PIXEL_REG
 
@@ -207,38 +264,15 @@ module pixel_algorithm_unit
             png_data_color_buffer_q_error <= '0; 
         end 
         else begin 
-            png_data_color_buffer_q_error <= (png_data_color_buffer_old - png_data_color_closest);
+            // if(png_data_color_buffer_old < png_data_color_closest) begin 
+            //     png_data_color_buffer_q_error <= (png_data_color_closest - png_data_color_buffer_old);
+            // end 
+            // else begin 
+                png_data_color_buffer_q_error <= (png_data_color_buffer_old - png_data_color_closest);
+            // end
         end 
 
     end 
-
-    // logic [RGB_SIZE - 1:0] png_quant_div_16; 
-
-    // always_comb begin : COMPUTE_PIXELS
-        
-    //     // " logic [x] name [y];" you index it this way "name[y][x]"
-   
-
-    //     png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
-    //     // account for going out of bounds
-    //     if(pixel_sweeper_e != (IMAGEX - 1'b1)) begin 
-    //         png_data_color_buffer_sweeped_e = png_data_color_buffer[pixel_sweeper_e][(RGB_SIZE-1):0] + ((png_quant_div_16) * 3'b111);
-    //     end 
-    //     // Left cnd: True if pixel_sweeper not on bottom row
-    //     if (pixel_sweeper < (IMAGE_SIZE - IMAGEY)) begin
-    //         // SW : Can do it if pixel_sweeper not on leftmost column (modulo IMAGEX != 0)
-    //         if (pixel_sweeper != '0) begin
-    //             png_data_color_buffer_sweeped_sw = png_data_color_buffer[pixel_sweeper_se][(RGB_SIZE-1):0] + ((png_quant_div_16) * 2'b11); 
-    //         end
-    //         // S : Can do it if got inside this loop 
-    //         png_data_color_buffer_sweeped_s = png_data_color_buffer[pixel_sweeper_s] + ((png_quant_div_16) * 3'b101); 
-    //         // SE : Can do it if pixel_sweeper not on rightmost column (modulo IMAGEX != IMAGEX - 1)
-    //         if (pixel_sweeper != (IMAGEX - 1'b1)) begin
-    //             png_data_color_buffer_sweeped_se = png_data_color_buffer[pixel_sweeper_sw][(RGB_SIZE-1):0] + (png_quant_div_16); 
-    //         end
-    //     end  
-    // end 
-
 
     //  x x x x
     //  x x x x
@@ -253,9 +287,9 @@ module pixel_algorithm_unit
     //   (1/16)
     // * = color[x] 
     // 7 = color[x + 1]  // e
-    // 3 = color[x + 63] // sw 
-    // 5 = color[x + 64] // s 
-    // 1 = color[x + 65]  // se
+    // 3 = color[x + IMAGEX - 1] // sw 
+    // 5 = color[x + IMAGEX] // s 
+    // 1 = color[x + IMAGEX + 1]  // se
 
 
 endmodule 

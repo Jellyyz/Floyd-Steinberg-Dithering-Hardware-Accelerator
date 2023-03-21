@@ -28,6 +28,9 @@ module dithering_loop_control
 
 ); 
 
+    assign rden_b = 1'b0; 
+    assign wren_b = 1'b0;
+
 logic png_counter_en; 
 logic [IMAGE_ADDR_WIDTH - 1:0] pixel_sweeper; 
 logic pixel_traversal_rst; 
@@ -42,13 +45,14 @@ pixel_traversal pixel_traversal(
 );
 
     always_ff @(posedge clk) begin : WRITE_ENABLEA
-        if(rst)begin 
+        if(rst) begin 
             wren_a <= 1'b0;
         end 
         // when two back from the images begin loaded in we can start to stop writing to sram 
-        else if((png_idx == (IMAGE_SIZE - 1)))begin
+        else if(png_idx == (IMAGE_SIZE - 1)) begin
             wren_a <= 1'b0; 
-        end 
+        end
+        // additionally we should stop writing to the SRAM on the clock cycle after the last computation 
         else if(compute_fin[3])begin
             wren_a <= 1'b0;  
         end
@@ -56,12 +60,12 @@ pixel_traversal pixel_traversal(
             if(MCU_TX_RDY)begin 
                 wren_a <= 1'b1;
             end
-            else if(compare_and_store_n)begin
+            else if(store_old_p)begin
                 wren_a <= 1'b1;
             end 
-            
         end 
     end 
+    
     always_ff @ (posedge clk or posedge rst) begin : FULL_PNG_IDX
         if(rst) begin 
             full_png_idx <= 1'b0; 

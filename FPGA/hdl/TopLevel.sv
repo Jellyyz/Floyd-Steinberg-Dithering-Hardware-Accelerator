@@ -65,6 +65,7 @@ module TopLevel
 	assign rst = ~(KEY[1]);
 	assign LED = 10'h0; 
 	assign data_valid = 1'b0; 
+	assign SPI_MISO = 1'bZ; 
 
 
 	logic LD_RAM, RD_RAM; 
