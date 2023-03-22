@@ -195,7 +195,7 @@ module pixel_algorithm_unit
         end 
         else if(compute_fin[1]) begin 
             data_a = q_a + ((png_quant_div_16) * 3'b111); 
-            data_b = q_a + ((png_quant_div_16) * 2'b11); 
+            data_b = q_b + ((png_quant_div_16) * 2'b11); 
         end 
         else if(compute_fin[2]) begin 
             data_a = 'X;
@@ -203,7 +203,7 @@ module pixel_algorithm_unit
         end 
         else if(compute_fin[3]) begin 
             data_a = q_a + ((png_quant_div_16) * 3'b101); 
-            data_b = q_a + png_quant_div_16; 
+            data_b = q_b + png_quant_div_16; 
         end
         else begin 
             data_a = external_SPI_data;
