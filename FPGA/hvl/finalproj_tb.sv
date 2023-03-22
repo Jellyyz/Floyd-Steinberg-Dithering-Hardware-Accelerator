@@ -86,7 +86,7 @@ initial begin: TEST_VECTORS
     // begin loading sram with data 
     for(i = 0; i < 'hFF - 1'h1; i++)begin  // change depending on image size
         external_SPI_data = $urandom; 
-        $display("Inserting %h at addr %h.", external_SPI_data, i); 
+        // $display("Inserting %h at addr %h.", external_SPI_data, i); 
         #2; 
     end
 

@@ -20,7 +20,6 @@ module dithering_loop_control
     output logic MCU_RX_RDY, 
     output logic rden_a, rden_b, 
     output logic wren_a, wren_b, 
-    output logic reset_dithering, 
     output logic store_old_p,
     output logic compare_and_store_n, 
     output logic [3:0] compute_fin, 
@@ -28,14 +27,13 @@ module dithering_loop_control
 
 ); 
 
-    assign rden_b = 1'b0; 
-    assign wren_b = 1'b0;
-
 logic png_counter_en; 
 logic [IMAGE_ADDR_WIDTH - 1:0] pixel_sweeper; 
 logic pixel_traversal_rst; 
 logic full_png_idx; 
 logic store_sram; 
+logic dither_rst;
+logic load_sram;
 // use pixel_traversal module in order to keep track of where we are in the image 
 pixel_traversal pixel_traversal(
 
@@ -44,56 +42,39 @@ pixel_traversal pixel_traversal(
 
 );
 
-    always_ff @(posedge clk) begin : WRITE_ENABLEA
-        if(rst) begin 
-            wren_a <= 1'b0;
-        end 
-        // when two back from the images begin loaded in we can start to stop writing to sram 
-        else if(png_idx == (IMAGE_SIZE - 1)) begin
-            wren_a <= 1'b0; 
-        end
-        // additionally we should stop writing to the SRAM on the clock cycle after the last computation 
-        else if(compute_fin[3])begin
-            wren_a <= 1'b0;  
-        end
-        else begin 
-            if(MCU_TX_RDY)begin 
-                wren_a <= 1'b1;
-            end
-            else if(store_old_p)begin
-                wren_a <= 1'b1;
-            end 
-        end 
-    end 
-    
-    always_ff @ (posedge clk or posedge rst) begin : FULL_PNG_IDX
-        if(rst) begin 
-            full_png_idx <= 1'b0; 
-        end 
-        else begin
-            full_png_idx <= (png_idx == (IMAGE_SIZE - 1));    
-        end 
-    end 
-
-
-
     // declaration of all states 
     enum logic [3:0]{
         RESET, 
         WAIT_FOR_MCU,
         S1_STORE_IMAGE_SRAM, 
 
-        S2_STORE_OLD_P, 
-        S2_COMPARE_AND_STORE_NEW,
-        S2_COMPUTE_FINAL_E, 
-        S2_COMPUTE_FINAL_SW,
-        S2_COMPUTE_FINAL_S, 
-        S2_COMPUTE_FINAL_SE, 
+        S2_CC1, 
+        S2_CC2,
+        S3_CC3, 
+        S3_CC4,
+        S3_CC5, 
+        S3_CC6, 
 
-        S3_LOAD_IMAGE_SRAM 
+        S4_LOAD_IMAGE_SRAM 
     
 
     } state, next_state; 
+    always_ff @ (posedge clk or posedge rst) begin : FULL_PNG_IDX
+    if(rst) begin 
+        full_png_idx <= 1'b0; 
+    end 
+    else begin
+        full_png_idx <= (png_idx == (IMAGE_SIZE - 1));    
+    end 
+    end 
+    always_ff @ (posedge clk or posedge rst) begin : MCU_RX
+    if(rst) begin 
+        MCU_RX_RDY <= 1'b0; 
+    end 
+    else if(load_sram) begin
+        MCU_RX_RDY <= 1'b1;    
+    end 
+    end 
 
     always_ff @ (posedge clk or posedge rst)begin 
         if(rst)begin 
@@ -123,98 +104,94 @@ pixel_traversal pixel_traversal(
             S1_STORE_IMAGE_SRAM:begin 
                 // once the FPGA detects that the signal is deasserted then we can start on S2 
                 if(full_png_idx)begin 
-                    next_state = S2_STORE_OLD_P; 
+                    next_state = S2_CC1; 
                 end 
             end 
-            S2_STORE_OLD_P:begin 
-                next_state = S2_COMPARE_AND_STORE_NEW; 
+            S2_CC1:begin 
+                next_state = S2_CC2; 
             end 
-            S2_COMPARE_AND_STORE_NEW:begin 
-                next_state = S2_COMPUTE_FINAL_E; 
+            S2_CC2:begin 
+                next_state = S3_CC3; 
             end
-            S2_COMPUTE_FINAL_E:begin 
-                next_state = S2_COMPUTE_FINAL_SW; 
+            S3_CC3:begin 
+                next_state = S3_CC4; 
             end 
-            S2_COMPUTE_FINAL_SW:begin 
-                next_state = S2_COMPUTE_FINAL_S;
-            end  
-            S2_COMPUTE_FINAL_S:begin 
-                next_state = S2_COMPUTE_FINAL_SE; 
+            S3_CC4:begin 
+                next_state = S3_CC5;
+            end   
+            S3_CC5:begin 
+                next_state = S3_CC6;
             end 
-            S2_COMPUTE_FINAL_SE:begin 
+            S3_CC6:begin 
                 // if the computation is done then we can move on to the reading back from the FPGA
                 if(full_png_idx)begin 
-                    next_state = S3_LOAD_IMAGE_SRAM; 
+                    next_state = S4_LOAD_IMAGE_SRAM; 
                 end 
                 // else continue to store new pixels
                 else begin 
-                    next_state = S2_STORE_OLD_P; 
+                    next_state = S2_CC1; 
                 end 
             end 
-            S3_LOAD_IMAGE_SRAM:begin 
+            S4_LOAD_IMAGE_SRAM:begin 
                 if(full_png_idx)begin 
                     next_state = WAIT_FOR_MCU; 
                 end 
             end 
         endcase 
     
-    end 
-
+    end  
     always_comb begin : state_condition 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 
         compute_fin = 4'b0000;
-        MCU_RX_RDY = 1'b0;
+        load_sram = 1'b0;
         store_sram = 1'b0; 
-		reset_dithering = 1'b0; 
-        pixel_traversal_rst = 1'b0; 
+        dither_rst = 1'b0; 
         unique case(state)
-            RESET: begin 
-                reset_dithering = 1'b1; 
+            RESET: begin  
+                dither_rst = 1'b1; 
             end 
             WAIT_FOR_MCU:begin 
                 // wait for a signal from the user
             end 
             S1_STORE_IMAGE_SRAM:begin 
-                if(full_png_idx) begin 
-                    pixel_traversal_rst = 1'b1; 
-                end 
                 store_sram = 1'b1; 
             end 
-            S2_STORE_OLD_P:begin 
+            S2_CC1:begin 
                 store_old_p = 1'b1; 
             end 
-            S2_COMPARE_AND_STORE_NEW:begin 
+            S2_CC2:begin 
                 compare_and_store_n = 1'b1; 
             end
-            S2_COMPUTE_FINAL_E:begin 
+            S3_CC3:begin // read 
                 compute_fin = 4'b0001;
             end 
-            S2_COMPUTE_FINAL_SW:begin 
+            S3_CC4:begin // write 
                 compute_fin = 4'b0010;
-            end  
-            S2_COMPUTE_FINAL_S:begin 
+            end 
+            S3_CC5:begin // read
                 compute_fin = 4'b0100;
+            end   
+            S3_CC6:begin // write
+                compute_fin = 4'b1000;
             end 
-            S2_COMPUTE_FINAL_SE:begin 
-                if(full_png_idx) 
-                    pixel_traversal_rst = 1'b1; 
-                compute_fin = 4'b1000; 
-            end 
-            S3_LOAD_IMAGE_SRAM:begin 
-                MCU_RX_RDY = 1'b1; 
+            S4_LOAD_IMAGE_SRAM:begin 
+                load_sram = 1'b1; 
             end 
 
         endcase 
     end 
-
+    
     always_comb begin 
-        
-
-        rden_a = store_old_p || MCU_RX_RDY || compute_fin != '0;
-        png_counter_en = (wren_a && store_sram) || (compute_fin[3]) || MCU_RX_RDY;   // enable pxl address traversal in sram  
+        wren_a = compare_and_store_n || store_sram && ~full_png_idx || compute_fin[3] || compute_fin[1]; 
+        wren_b = compute_fin[3] || compute_fin[1]; 
+        rden_a = store_old_p || load_sram || compute_fin[2] || compute_fin[0]; 
+        rden_b = compute_fin[2] || compute_fin[0];
+        pixel_traversal_rst = full_png_idx && store_sram || dither_rst || full_png_idx && compute_fin[3];
+        png_counter_en = (wren_a && store_sram) || (compute_fin[3]) || load_sram;   // enable pxl address traversal in sram  
                                                                      // s1
-                                                                     // last step of s2
+                                                                     // last step of s3
+                                                                     // when storing back into mcu
         
     end 
 

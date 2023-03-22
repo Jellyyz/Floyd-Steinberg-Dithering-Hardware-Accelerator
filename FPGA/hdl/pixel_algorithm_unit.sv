@@ -26,15 +26,12 @@ module pixel_algorithm_unit
 
 
     ); 
-    
-    // contains the old pixel - reg 
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_old; 
 
     // closest pixel to old pixel - some wire 
-    logic [RGB_SIZE - 1:0] png_data_color_closest; 
+    logic [(RGB_SIZE * 2) - 1:0] png_data_color_closest; 
 
     // quant_error - reg 
-    logic [15:0] png_data_color_buffer_q_error; 
+    logic [(RGB_SIZE *2) - 1:0] png_data_color_buffer_q_error; 
 // wikipedia formula :     
 // for each y from top to bottom do
 //     for each x from left to right do
@@ -52,23 +49,28 @@ module pixel_algorithm_unit
  
 // adapted version for our hardware 
 // for i until image size
-//     state 1 old <= sram[x][y]                                            store_old_P                        rden_a = 1'b1  wren_a = 1'b0; 
-//     state 2 sram[x][y] <= closest_pixel(old)                             compare_and_store_N                rden_a = 1'b0  wren_a = 1'b1;              
-//     state 2 quant_error <= old - closest_pixel(old)                      compare_and_store_N                rden_a = 1'bX  wren_a = 1'bX;            
+//     state 1 old <= q_a                                                   store_old_P                        rden_a = 1'b1  wren_a = 1'b0; 
+//     state 2 sram[x][y] <= closest_pixel(q_a)                             compare_and_store_N                rden_a = 1'b0  wren_a = 1'b1;              
+//     state 2 quant_error <= old - closest_pixel(q_a)                      compare_and_store_N                rden_a = 1'bX  wren_a = 1'bX;            
 //     state 3 sram[x + 1][y] <= sram[x + 1][y] + ((quant_error >> 4) * 7)
 //     state 4 sram[x - 1][y + 1] <= sram[x - 1][y + 1] + ((quant_error >> 4) * 3)
 //     state 5 sram[x][y + 1] <= sram[x][y + 1] + ((quant_error >> 4) * 5)
-//     state 6 sram[x + 1][y + 1] <= sram[x + 1][y + 1] + (quant_error >> 4)    
-// on state 3 read srame and store into sram at e
-// on state 4 read sramsw and and store into sram at se
-// on state 5 read srams and and store into sram at s
-// on state 6 read sramse and and store into sram at sw
-// on state 6 [x][y] must ++
-// on state 1 store sram pixel_traversal into old, also store sramse buffer into sram again 
-// repeat 
+//     state 6 sram[x + 1][y + 1] <= sram[x + 1][y + 1] + (quant_error >> 4)   
 
+// cc1 assert rden_a to sram to get q_a @ cc2 
+
+// cc2 use q_a to combinationally find closest_pixel rd_en must be deasserted 
+// cc2 at the same time can also find quant error which will be updated @ cc3
+// cc2 sram[x][y] will be updated @ next clock cycle (fine since it is never used again)
+
+// cc3 need to poll for sramE & sramSW rdy @ cc4 
+// cc4 need to write into sramE & sramSW rdy @ cc5, doesn't matter tho 
+
+// cc5 need to poll for sramS & sramSE rdy @ cc5
+// cc6 need to write into sramS & sramSE rdy @ cc1, doesn't matter tho
+
+    // can immediately go from cc5 to cc1 or s3 
     // control signals 
-    logic reset_dithering;
     logic store_old_p;
     logic compare_and_store_n;
 
@@ -84,7 +86,8 @@ module pixel_algorithm_unit
     logic read_en_a, read_en_b; 
     logic write_en_a, write_en_b; 
 
-    logic valid_png_idx;
+    logic valid_png_idxA;
+    logic valid_png_idxB;
 
     mem_block pixel_sram(
         // inputs
@@ -118,7 +121,6 @@ module pixel_algorithm_unit
         .wren_a(wren_a), .wren_b(wren_b), 
         .MCU_RX_RDY(MCU_RX_RDY),
 
-        .reset_dithering(reset_dithering), 
         .store_old_p(store_old_p),
         .compare_and_store_n(compare_and_store_n),  
         .compute_fin(compute_fin),
@@ -132,29 +134,26 @@ module pixel_algorithm_unit
 
     logic [RGB_SIZE - 1:0] png_quant_div_16;
     assign png_quant_div_16 = png_data_color_buffer_q_error >> 4; 
-    assign png_data_color_closest = (png_data_color_buffer_old >= 128) ? 8'b11111111 : 8'h0; 
+    assign png_data_color_closest = (q_a >= 128) ? 16'hFFFF : 16'h0; 
 
     always_comb begin: VALID_PNG_IDX
         // 1 is valid else 0 
         last_row_idx_chk = (png_idx < (IMAGE_SIZE - IMAGEX)); 
-        last_col_idx_chk = ((png_idx + 1) % IMAGEX == 0);
-        first_col_idx_chk = (png_idx % IMAGEX == 0);
+        last_col_idx_chk = ((png_idx + 1) % IMAGEX != 0);
+        first_col_idx_chk = (png_idx % IMAGEX != 0);
 
         unique case(compute_fin)
-            4'b0001:begin // east
-                valid_png_idx = last_col_idx_chk; 
+            4'b0001, 4'b0010:begin // E & SW checks 
+                valid_png_idxA = last_col_idx_chk; 
+                valid_png_idxB = first_col_idx_chk & last_row_idx_chk; 
             end 
-            4'b0010:begin // southwest 
-                valid_png_idx = first_col_idx_chk & last_row_idx_chk; 
-            end 
-            4'b0100:begin // south
-                valid_png_idx = last_row_idx_chk;           
-            end 
-            4'b1000:begin // southeast
-                valid_png_idx = last_col_idx_chk & last_row_idx_chk;  
-            end
-            default:begin // if not computing still should be less than image size
-                valid_png_idx = png_idx < IMAGE_SIZE;
+            4'b0100, 4'b1000:begin // S & SE checks
+                valid_png_idxA = last_row_idx_chk; 
+                valid_png_idxB = last_col_idx_chk & last_row_idx_chk; 
+            end          
+            default:begin // if not computing still should be less than image size, block address B access
+                valid_png_idxA = png_idx < IMAGE_SIZE;
+                valid_png_idxB = 1'b0;
             end 
 
         endcase 
@@ -162,81 +161,67 @@ module pixel_algorithm_unit
     
     end 
 
-    always_comb begin: ADDR_A_MUX
+    always_comb begin: ADDR_A_AND_B_MUX
         unique case(compute_fin)
-            4'b0001:begin // east
+            4'b0001, 4'b0010:begin // begin read/write of E and SW for A and B 
                 address_a = png_idx + 1'b1;
+                address_b = png_idx + (IMAGEX - 1'b1);
             end 
-            4'b0010:begin // southwest 
-                address_a = png_idx + (IMAGEX - 1'b1);
-            end 
-            4'b0100:begin // south
-                address_a = png_idx + (IMAGEX);             
-            end 
-            4'b1000:begin // southeast
-                address_a = png_idx + (IMAGEX + 1'b1); 
+            4'b0100, 4'b1000:begin // begin read/write of S and SE for A and B 
+                address_a = png_idx + IMAGEX;
+                address_b = png_idx + (IMAGEX + 1'b1);            
             end
-            default:begin // if not computing just use base addr 
+            default:begin // if not computing just use base addr also address B is whatever
                 address_a = png_idx; 
+                address_b = 'X; 
             end 
 
         endcase 
 
 
-    end 
-
-    always_comb begin: ADDR_B 
-        address_b = '0;
     end 
 
     // ~~~~~~~~~~~~~~~ DATA THAT IS BEING WRITTEN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    always_comb begin: DATA_A 
+    always_comb begin: DATA_A_AND_B 
+        // need to store the closest pixel back into the sram 
         if(compare_and_store_n) begin 
-            data_a = png_data_color_closest; 
+            data_a = png_data_color_closest[15:0];              
+            data_b = 'X; 
         end 
-        else if(compute_fin[0]) begin 
-            data_a = q_a + (png_quant_div_16 * 3'b111); 
+        // read E and SE
+        else if(compute_fin[0]) begin   
+            data_a = 'X;        
+            data_b = 'X; 
         end 
         else if(compute_fin[1]) begin 
-            data_a = q_a + ((png_quant_div_16) * 2'b11); 
+            data_a = q_a + ((png_quant_div_16) * 3'b111); 
+            data_b = q_a + ((png_quant_div_16) * 2'b11); 
         end 
         else if(compute_fin[2]) begin 
-            data_a = q_a + ((png_quant_div_16) * 3'b101); 
+            data_a = 'X;
+            data_b = 'X; 
         end 
         else if(compute_fin[3]) begin 
-            data_a = q_a + (png_quant_div_16); 
+            data_a = q_a + ((png_quant_div_16) * 3'b101); 
+            data_b = q_a + png_quant_div_16; 
         end
         else begin 
             data_a = external_SPI_data;
-        end 
-    end 
+            data_b = 'X; 
 
-    always_comb begin: DATA_B 
-        data_b = '0;
+        end 
     end 
 
 
     always_comb begin: SRAM_DATA_ACCESS_SAFETY_LOCK
         // if pixels are not valid then block writes and reads
-        write_en_a = wren_a && valid_png_idx;
-        write_en_b = wren_b && valid_png_idx; 
-        read_en_a = 1'b1 && valid_png_idx; 
-        read_en_b = rden_b && valid_png_idx;  
+        write_en_a = wren_a && valid_png_idxA;
+        write_en_b = wren_b && valid_png_idxB; 
+        read_en_a = rden_a && valid_png_idxA; 
+        read_en_b = rden_b && valid_png_idxB;  
     end 
 
 
-
-
-    // temporarily store the 4 adjacent sram data into here 
-    logic [RGB_SIZE - 1:0] png_data_color_buffer [ADJ_PIXELS];
-
-
-
-    // the correct "new" RGB value of the png_data (wire connecting to the register unit)
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_e;
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_sw;
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_s;
-    logic [RGB_SIZE - 1:0] png_data_color_buffer_sweeped_se;
 
     // temp values that have the correct current indexing for the pixel counter 
     // logic [IMAGE_SIZE:0] pixel_sweeper_e; 
@@ -245,18 +230,6 @@ module pixel_algorithm_unit
     // logic [IMAGE_SIZE:0] pixel_sweeper_se; 
 
 
- 
-   
-
-    always_ff @(posedge clk or posedge rst) begin : OLD_PIXEL_REG
-
-        if(rst) begin 
-            png_data_color_buffer_old <= '0; 
-        end 
-        else if(store_old_p) begin 
-            png_data_color_buffer_old <= q_a;
-        end 
-    end
 
     always_ff @(posedge clk or posedge rst) begin : QUANT_ERROR_REG
 
@@ -264,12 +237,9 @@ module pixel_algorithm_unit
             png_data_color_buffer_q_error <= '0; 
         end 
         else begin 
-            // if(png_data_color_buffer_old < png_data_color_closest) begin 
-            //     png_data_color_buffer_q_error <= (png_data_color_closest - png_data_color_buffer_old);
-            // end 
-            // else begin 
-                png_data_color_buffer_q_error <= (png_data_color_buffer_old - png_data_color_closest);
-            // end
+            if(compare_and_store_n)begin 
+                png_data_color_buffer_q_error <= (q_a - png_data_color_closest);
+            end 
         end 
 
     end 
