@@ -18,8 +18,8 @@ module dithering_loop_control
     input logic MCU_TX_RDY, 
 
     output logic MCU_RX_RDY, 
-    output logic rden_a, rden_b, 
-    output logic wren_a, wren_b, 
+    output logic rden,
+    output logic wren,
     output logic store_old_p,
     output logic compare_and_store_n, 
     output logic [3:0] compute_fin, 
@@ -55,7 +55,6 @@ logic dither_rst;
             full_png_idx <= (png_idx == (IMAGE_SIZE - 1));    
         end 
     end 
-
 
     always_comb 
     begin : next_state_condition 
@@ -114,6 +113,7 @@ logic dither_rst;
         endcase 
     
     end  
+
     always_comb begin : state_condition 
         store_old_p = 1'b0; 
         compare_and_store_n = 1'b0; 
@@ -158,6 +158,7 @@ logic dither_rst;
 
         endcase 
     end 
+
     always_comb begin 
         if(load_sram == 2'b01 || load_sram == 2'b10)begin 
             load_sram_logic = 1'b1; 
@@ -166,18 +167,13 @@ logic dither_rst;
             load_sram_logic = 1'b0; 
         end
     end 
+
     always_comb begin 
-        wren_a = ~load_sram_logic && (compare_and_store_n || store_sram && ~full_png_idx || compute_fin[3] || compute_fin[1]); 
-        wren_b = ~load_sram_logic && (compute_fin[3] || compute_fin[1]); 
-        rden_a = store_old_p || load_sram[0] || compute_fin[2] || compute_fin[0]; 
-        rden_b = load_sram[0] || (compute_fin[2] || compute_fin[0]);
+        wren = (store_sram && ~full_png_idx) || compare_and_store_n;
+        rden = store_old_p || compute_fin;
         
-        
-        pixel_traversal_rst = full_png_idx && (store_sram || compute_fin[3] || load_sram_logic || dither_rst );
-        png_counter_en =  ~load_sram && ~full_png_idx && (store_sram || compute_fin[3]);   // enable pxl address traversal in sram  
-                                                                     // s1
-                                                                     // last step of s3
-                                                                     // when storing back into mcu
+        pixel_traversal_rst = full_png_idx;
+        png_counter_en = (store_sram && ~full_png_idx) || compute_fin[3];
         
     end 
 

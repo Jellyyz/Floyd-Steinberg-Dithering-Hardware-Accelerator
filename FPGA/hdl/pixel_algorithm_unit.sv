@@ -74,16 +74,16 @@ module pixel_algorithm_unit
 // cc6 need to write into sramS & sramSE rdy @ cc1, doesn't matter tho
 
 
-// cc3 need to poll for sramE; sramE rdy @cc4  
-// cc4 sramE is ready, write into sramE; 
-// cc4 need to poll for sramSW; sramSW rdy @ cc5
-// cc5 sramSW is ready, write into sramSW; 
-// cc5 need to poll for sramS; sramS rdy @ cc6 
-// cc6 sramS is ready, write into sramS; 
-// cc6 need to poll for sramSE; sramSE rdy @ cc7 
+// cc3 need to poll for sramE; sramE rdy @cc4             compute 0    q_b   <= sramE @ address sramE     rden_a = 1'b0 rden_b = 1'b1
+// cc4 sramE is ready, write into sramE;                  compute 1    dataA <= sramE @ address sramE     wren_a = 1'b1 wren_b = 1'b0 
+// cc4 need to poll for sramSW; sramSW rdy @ cc5                       q_b   <= sramSW @ address sramSW   rden_a = 1'b0 rden_b = 1'b1 
+// cc5 sramSW is ready, write into sramSW;                compute 2    dataA <= sramSW @ address sramSW   wren_a = 1'b1 wren_b = 1'b0    
+// cc5 need to poll for sramS; sramS rdy @ cc6                         q_b   <= sramS @ address sramS     rden_a = 1'b0 rden_b = 1'b1  
+// cc6 sramS is ready, write into sramS;                  compute 3    dataA <= sramS @ address sramS     wren_a = 1'b1 wren_b = 1'b0 
+// cc6 need to poll for sramSE; sramSE rdy @ cc7                       q_b   <= sramSW @ address sramSW   rden_a = 1'b0 rden_b = 1'b1 
 // cc7 is a shared state with q_a1
-// cc7 sramSE is ready, write into sramSE; 
-// cc7 need to read from sram also. 
+// cc7 sramSE is ready, write into sramSE;                             dataA <= sramSW @ address sramSW   wren_a = 1'b1 wren_b = 1'b0
+// cc7 need to read from sram also.                                    q_b   <= sramSW @ address sramW    rden_a = 1'b0 rden_b = 1'b1 
 
 
 
@@ -96,31 +96,29 @@ module pixel_algorithm_unit
     logic [IMAGE_ADDR_WIDTH - 1:0] png_idx;
     
     // used by the SRAM 
-    logic [15:0] address_a, address_b; // @TODO: maybe change to be parameterizable? 
-    logic [RGB_SIZE - 1:0] data_a, data_b, q_a, q_b;
-    logic rden_a, rden_b; 
-    logic wren_a, wren_b; 
+    logic [15:0] address; // @TODO: maybe change to be parameterizable? 
+    logic [RGB_SIZE - 1:0] data, q;
+    logic rden; 
+    logic wren; 
 
-    logic read_en_a, read_en_b; 
-    logic write_en_a, write_en_b; 
+    logic read_en; 
+    logic write_en; 
 
-    logic valid_png_idxA;
-    logic valid_png_idxB;
+    logic valid_png_idx;
     logic [1:0] load_sram;
     logic store_sram, load_sram_logic; 
     logic full_png_idx;
 
     mem_block pixel_sram(
         // inputs
-        .address_a(address_a), 
-        .address_b(address_b), 
-        .clock(clk), 
-        .data_a(data_a), .data_b(data_b),
-        .rden_a(read_en_a), .rden_b(read_en_b),
-        .wren_a(write_en_a), .wren_b(write_en_b), 
+        .address(address), 
+        .clock(clk), .aclr(rst),
+        .data(data), 
+        .rden(read_en),
+        .wren(write_en),
         
         // outputs 
-        .q_a(q_a), .q_b(q_b) 
+        .q(q) 
     );
     dithering_loop_control #(
 		.CLOCK_SPEED(CLOCK_SPEED),
@@ -171,25 +169,23 @@ module pixel_algorithm_unit
         first_col_idx_chk = (png_idx % IMAGEX != 0);
 
         unique case(compute_fin)
-            4'b0001, 4'b0010:begin // E & SW checks 
-                valid_png_idxA = last_col_idx_chk; 
-                valid_png_idxB = first_col_idx_chk & last_row_idx_chk; 
+            4'b0001:begin // east 
+                valid_png_idx = last_col_idx_chk; 
             end 
-            4'b0100, 4'b1000:begin // S & SE checks
-                valid_png_idxA = last_row_idx_chk; 
-                valid_png_idxB = last_col_idx_chk & last_row_idx_chk; 
+            4'b0010:begin // southwest 
+                valid_png_idx = first_col_idx_chk & last_row_idx_chk; 
+            end 
+            4'b0100:begin // south 
+                valid_png_idx = last_row_idx_chk; 
+            end 
+            4'b1000:begin // southeast 
+                valid_png_idx = last_col_idx_chk & last_row_idx_chk; 
             end          
             default:begin 
                 // if not computing still should be less than image size, block address B access
                 // this SHOULD be accounting for loading and storing sram through first if
-                if(load_sram_logic)begin 
-                    valid_png_idxA = png_idx < IMAGE_SIZE;
-                    valid_png_idxB = (png_idx + 1'b1) < IMAGE_SIZE;
-                end
-                else begin 
-                    valid_png_idxA = png_idx < IMAGE_SIZE;
-                    valid_png_idxB = 1'b0;
-                end 
+                valid_png_idx = png_idx < IMAGE_SIZE;
+        
             end 
 
         endcase 
@@ -199,26 +195,21 @@ module pixel_algorithm_unit
 
     always_comb begin: ADDR_A_AND_B_MUX
         unique case(compute_fin)
-            4'b0001, 4'b0010:begin // begin read/write of E and SW for A and B 
-                address_a = png_idx + 1'b1;
-                address_b = png_idx + (IMAGEX - 1'b1);
+            4'b0001:begin 
+                address = png_idx + 1'b1;
             end 
-            4'b0100, 4'b1000:begin // begin read/write of S and SE for A and B 
-                address_a = png_idx + IMAGEX;
-                address_b = png_idx + (IMAGEX + 1'b1);            
+            4'b0010:begin
+                address = png_idx + (IMAGEX - 1'b1);
+            end 
+            4'b0100:begin 
+                address = png_idx + IMAGEX;
+            end 
+            4'b1000:begin
+                address = png_idx + (IMAGEX + 1'b1);            
             end
             default:begin 
             // if not computing 
-                // if loading or store from sram, need to index png idx and png idx +`1 
-                if(load_sram_logic)begin 
-                    address_a = png_idx; 
-                    address_b = png_idx + 1'b1;
-                end 
-                // else general computing access once 
-                else begin 
-                    address_a = png_idx; 
-                    address_b = 'X; 
-                end 
+                address_a = png_idx; 
             end 
 
         endcase 
@@ -230,13 +221,10 @@ module pixel_algorithm_unit
     always_comb begin: DATA_A_AND_B 
         // need to store the closest pixel back into the sram 
         if(compare_and_store_n) begin 
-            data_a = png_data_color_closest[7:0];              
-            data_b = 'X; 
+            data = png_data_color_closest[7:0];              
         end 
-        // read E and SE
         else if(compute_fin[0]) begin   
-            data_a = 'X;        
-            data_b = 'X; 
+            data = 
         end 
         else if(compute_fin[1]) begin 
             data_a = q_a + ((png_quant_div_16) * 3'b111); 
