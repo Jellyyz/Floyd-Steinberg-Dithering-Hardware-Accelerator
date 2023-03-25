@@ -2,7 +2,26 @@
 // COPYRIGHT 2023
 // 
 // Top Level HDL of Group 29 ECE445 SP23
+package states; // declaration of all states 
+    typedef enum logic [3:0]{
+        RESET, 
+        WAIT_FOR_MCU,
+        S1_STORE_IMAGE_SRAM, 
 
+        S2_CC1, 
+        S2_CC2,
+        S3_CC3, 
+        S3_CC4,
+        S3_CC5, 
+        S3_CC6, 
+
+        S4_CC1, 
+        S4_CC2
+
+    } state_t; 
+endpackage 
+
+import states::*;
 module TopLevel 
 # (
 	parameter CLOCK_SPEED = 50000000,
@@ -54,7 +73,9 @@ module TopLevel
 
 
 		// Denotes whether data on the MISO line is valid (i.e., useful to the master) //
-		output logic data_valid
+		output logic data_valid,
+        output states::state_t state, next_state,
+        output logic [RGB_SIZE - 1: 0] sram_out_test
 		
 );
 	// Each `received` is a byte. For this example, we have a maximum of 8 bytes ([7:0]) to receive.
@@ -98,8 +119,10 @@ module TopLevel
 		.MCU_TX_RDY(MCU_TX_RDY), 
 
 		// output 
-		.MCU_RX_RDY(MCU_RX_RDY)
-
+		.MCU_RX_RDY(MCU_RX_RDY),
+		.next_state(next_state),
+		.state(state),
+		.sram_out_test(sram_out_test)
 	);
 	
 	// SPI_control SPI_control(
