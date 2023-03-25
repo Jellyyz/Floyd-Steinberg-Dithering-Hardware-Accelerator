@@ -1,6 +1,7 @@
 // UIUC ECE 445 Senior Design
 // RTL by : Gally Huang
 
+import states::*;
 module pixel_algorithm_unit
     # (
         parameter CLOCK_SPEED = 50000000,
@@ -22,11 +23,12 @@ module pixel_algorithm_unit
         input logic [RGB_SIZE - 1:0] external_SPI_data,
         input logic MCU_TX_RDY, 
 
-        output logic MCU_RX_RDY
-
+        output logic MCU_RX_RDY,
+        output states::state_t state, next_state,
+        output logic [RGB_SIZE - 1: 0] sram_out_test,
+        output logic [RGB_SIZE - 1: 0] sram_out_stream
 
     ); 
-
     // closest pixel to old pixel - some wire 
     logic [(RGB_SIZE * 2) - 1:0] png_data_color_closest; 
 
@@ -59,15 +61,31 @@ module pixel_algorithm_unit
 
 // cc1 assert rden_a to sram to get q_a @ cc2 
 
+
 // cc2 use q_a to combinationally find closest_pixel rd_en must be deasserted 
 // cc2 at the same time can also find quant error which will be updated @ cc3
 // cc2 sram[x][y] will be updated @ next clock cycle (fine since it is never used again)
 
-// cc3 need to poll for sramE & sramSW rdy @ cc4 
-// cc4 need to write into sramE & sramSW rdy @ cc5, doesn't matter tho 
+// cc3 need to poll for sramE & sramSW; sramE rdy @ qa cc4, sramSW rdy qb @cc5  
+// cc4 need to write into sramE       ; rdy @ cc5, doesn't matter though 
 
-// cc5 need to poll for sramS & sramSE rdy @ cc5
+// cc5 need to write into sramSW      ; rdy @ cc6, doesn't matter though 
+// cc5 need to poll for sramS & sramSE; sramS rdy @ qa cc5, sramSE rdy qb @cc7
 // cc6 need to write into sramS & sramSE rdy @ cc1, doesn't matter tho
+
+
+// cc3 need to poll for sramE; sramE rdy @cc4  
+// cc4 sramE is ready, write into sramE; 
+// cc4 need to poll for sramSW; sramSW rdy @ cc5
+// cc5 sramSW is ready, write into sramSW; 
+// cc5 need to poll for sramS; sramS rdy @ cc6 
+// cc6 sramS is ready, write into sramS; 
+// cc6 need to poll for sramSE; sramSE rdy @ cc7 
+// cc7 is a shared state with q_a1
+// cc7 sramSE is ready, write into sramSE; 
+// cc7 need to read from sram also. 
+
+
 
     // can immediately go from cc5 to cc1 or s3 
     // control signals 
@@ -88,6 +106,9 @@ module pixel_algorithm_unit
 
     logic valid_png_idxA;
     logic valid_png_idxB;
+    logic [1:0] load_sram;
+    logic store_sram, load_sram_logic; 
+    logic full_png_idx;
 
     mem_block pixel_sram(
         // inputs
@@ -124,7 +145,14 @@ module pixel_algorithm_unit
         .store_old_p(store_old_p),
         .compare_and_store_n(compare_and_store_n),  
         .compute_fin(compute_fin),
-        .png_idx(png_idx) 
+        .png_idx(png_idx),
+        .state(state), 
+        .next_state(next_state),
+        .load_sram(load_sram), .load_sram_logic(load_sram_logic),
+        .store_sram(store_sram),
+        .full_png_idx(full_png_idx)
+
+
     ); 
 
     logic last_row_idx_chk; 
@@ -151,9 +179,17 @@ module pixel_algorithm_unit
                 valid_png_idxA = last_row_idx_chk; 
                 valid_png_idxB = last_col_idx_chk & last_row_idx_chk; 
             end          
-            default:begin // if not computing still should be less than image size, block address B access
-                valid_png_idxA = png_idx < IMAGE_SIZE;
-                valid_png_idxB = 1'b0;
+            default:begin 
+                // if not computing still should be less than image size, block address B access
+                // this SHOULD be accounting for loading and storing sram through first if
+                if(load_sram_logic)begin 
+                    valid_png_idxA = png_idx < IMAGE_SIZE;
+                    valid_png_idxB = (png_idx + 1'b1) < IMAGE_SIZE;
+                end
+                else begin 
+                    valid_png_idxA = png_idx < IMAGE_SIZE;
+                    valid_png_idxB = 1'b0;
+                end 
             end 
 
         endcase 
@@ -171,9 +207,18 @@ module pixel_algorithm_unit
                 address_a = png_idx + IMAGEX;
                 address_b = png_idx + (IMAGEX + 1'b1);            
             end
-            default:begin // if not computing just use base addr also address B is whatever
-                address_a = png_idx; 
-                address_b = 'X; 
+            default:begin 
+            // if not computing 
+                // if loading or store from sram, need to index png idx and png idx +`1 
+                if(load_sram_logic)begin 
+                    address_a = png_idx; 
+                    address_b = png_idx + 1'b1;
+                end 
+                // else general computing access once 
+                else begin 
+                    address_a = png_idx; 
+                    address_b = 'X; 
+                end 
             end 
 
         endcase 
@@ -185,7 +230,7 @@ module pixel_algorithm_unit
     always_comb begin: DATA_A_AND_B 
         // need to store the closest pixel back into the sram 
         if(compare_and_store_n) begin 
-            data_a = png_data_color_closest[15:0];              
+            data_a = png_data_color_closest[7:0];              
             data_b = 'X; 
         end 
         // read E and SE
@@ -243,7 +288,27 @@ module pixel_algorithm_unit
         end 
 
     end 
+    logic [31:0] count; 
+    // attempt to pipeline sram to achieve 1 read byte / cycle 
+    always_ff @(posedge clk) begin: SRAM_OUT_STREAM
+        if(rst)begin
+            sram_out_stream <= '0;
+            count <= '0;  
+        end 
+        else begin 
+            if(load_sram[0] && ~full_png_idx) begin 
+                sram_out_stream <= q_a; 
+                count <= count + 1'b1; 
+            end
+            else if(load_sram[1] && ~full_png_idx)begin 
+                sram_out_stream <= q_b; 
+                count <= count + 1'b1; 
+            end 
+        end 
+    end 
 
+    
+    assign sram_out_test = sram_out_stream; 
     //  x x x x
     //  x x x x
     //  x x x x
