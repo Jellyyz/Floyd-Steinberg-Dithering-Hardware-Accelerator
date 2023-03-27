@@ -12,5 +12,8 @@
 using namespace std;
 
 void floyd_steinberg_dithering_serial(vector<unsigned char> &img, unsigned int w, unsigned int h, bool clamp);
+void floyd_steinberg_dithering_serial1(vector<unsigned char> &img, unsigned int w, unsigned int h);
+
+void bound(int &pixel);
 
 #endif
