@@ -66,7 +66,7 @@ int main(void) {
     cout << "Final encoding is " << endl;
     cout << encodedFinal << endl;
     
-    floyd_steinberg_dithering_serial(img2, w, h, true);
+    floyd_steinberg_dithering_serial(img2, w, h, false);
 
     lodepng::encode("test_after_CLAMP.png", img2, w, h, LodePNGColorType::LCT_GREY, 8);
 
