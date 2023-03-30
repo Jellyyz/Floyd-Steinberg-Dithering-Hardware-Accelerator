@@ -1,6 +1,6 @@
 // This test bench serves as a way for us to test how the memory cell actually works inside of the mem IP instantiated by quartus 
-// Copyright ECE445 2023 
-// By Gally Huang 
+// 
+// By: ghuang23 for ECE445 submission of Progress Report 3/17/2023
 module mem_block_tb(); 
 timeunit 10ns;	// Half clock cycle at 50 MHz
 			// This is the amount of time represented by #1 
@@ -77,15 +77,6 @@ task read_memB(input [15:0] a_a, output [7:0] rx_a);
 
 endtask 
 
-// task mosi(); 
-
-// endtask
-
-// task miso(); 
-
-// endtask 
-
-
 
 initial begin: TEST_VECTORS
         wren_a = 1'b0; 
@@ -147,8 +138,10 @@ initial begin: TEST_VECTORS
             rden_b = 1'b1;
             // Read Memory from Q port A 
             read_memA(i, recieved_a); 
+            $display("Read %h at addr %h", recieved_a, i);
             // Read Memory from Q port B
             read_memB(i + 2, recieved_b);  
+            $display("Read %h at addr %h", recieved_b, i);
             #1;
             rden_a = 1'b0; 
             rden_b = 1'b0;

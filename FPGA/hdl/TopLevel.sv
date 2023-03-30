@@ -15,8 +15,7 @@ package states; // declaration of all states
         S3_CC5, 
         S3_CC6, 
 
-        S4_CC1, 
-        S4_CC2
+        S4_CC1
 
     } state_t; 
 endpackage 

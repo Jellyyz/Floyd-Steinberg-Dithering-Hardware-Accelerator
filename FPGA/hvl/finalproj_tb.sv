@@ -5,8 +5,8 @@ module finalproj_tb
 # (
 	parameter CLOCK_SPEED = 50000000,
 	parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
-	parameter IMAGEY = 16,
-	parameter IMAGEX = 16,
+	parameter IMAGEY = 4,
+	parameter IMAGEX = 4,
 	parameter IMAGE_SIZE = IMAGEY * IMAGEX,
 	parameter IMAGEYlog2 = $clog2(IMAGEY), 
 	parameter IMAGEXlog2 = $clog2(IMAGEX),
@@ -66,29 +66,57 @@ endfunction
 // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 // m is y 
 // n is x 
-
+logic [8:0] calcE, calcSW, calcS, calcSE; 
 
 task run_algor(input logic [IMAGE_ADDR_WIDTH - 1:0] m, input logic [IMAGE_ADDR_WIDTH - 1:0] n);
     old_pixel = test_vector_sram[m * IMAGEY + n];
     new_closest = closest_pixel(old_pixel); 
     test_vector_sram[m * IMAGEY + n] = closest_pixel(old_pixel); 
-    quant_error = old_pixel - new_closest; 
-
+    calcE =  test_vector_sram[m * IMAGEY + (n + 1)] + ((quant_error >> 4) * 3'b111); 
+    calcSW = test_vector_sram[(m + 1) * IMAGEY + (n - 1)] + ((quant_error >> 4) * 2'b11);
+    calcS =  test_vector_sram[(m + 1) * IMAGEY + n] + ((quant_error >> 4) * 3'b101); 
+    calcSE =  test_vector_sram[(m + 1) * IMAGEY + (n + 1)] + ((quant_error >> 4));
+    if(old_pixel > new_closest) begin 
+        quant_error = old_pixel - new_closest; 
+    end 
+    else begin 
+        quant_error = new_closest - old_pixel; 
+    end 
     if(n < IMAGEX)begin 
         // east 
-        test_vector_sram[m * IMAGEY + (n + 1)] = test_vector_sram[m * IMAGEY + (n + 1)] + (quant_error * 7/16);
+        if(calcE < 256) begin 
+            test_vector_sram[m * IMAGEY + (n + 1)] = calcE;
+        end 
+        else begin 
+            test_vector_sram[m * IMAGEY + (n + 1)] = 8'd255;
+        end 
     end 
     if(m < IMAGEY - 1 && n != 0)begin 
         // southwest
-        test_vector_sram[(m + 1) * IMAGEY + (n - 1)] = test_vector_sram[(m + 1) * IMAGEY + (n - 1)] + (quant_error * 3/16); 
+        if(calcSW < 256) begin 
+            test_vector_sram[(m + 1) * IMAGEY + (n - 1)] = calcSW;
+        end 
+        else begin 
+            test_vector_sram[(m + 1) * IMAGEY + (n - 1)] = 8'd255;
+        end 
     end 
     if(m < IMAGEY - 1)begin 
         // south
-        test_vector_sram[(m + 1) * IMAGEY + n] = test_vector_sram[(m + 1) * IMAGEY + n] + (quant_error * 5/16); 
+        if(calcS < 256) begin 
+            test_vector_sram[(m + 1) * IMAGEY + n] = calcS;
+        end 
+        else begin 
+            test_vector_sram[(m + 1) * IMAGEY + n] = 8'd255;
+        end
     end 
     if(n < IMAGEX && m < IMAGEY - 1)begin
         // southeast  
-        test_vector_sram[(m + 1) * IMAGEY + (n + 1)] = test_vector_sram[(m + 1) * IMAGEY + (n + 1)] + (quant_error * 1/16);  
+        if(calcSE < 256) begin 
+            test_vector_sram[(m + 1) * IMAGEY + (n + 1)] = calcSE;
+        end
+        else begin 
+            test_vector_sram[(m + 1) * IMAGEY + (n + 1)] = 8'd255;
+        end
     end 
 
 endtask
@@ -129,7 +157,7 @@ TopLevel #(
 
 
 ); 
-integer error_count = 0; 
+logic [15:0] error_count = 0; 
 
 logic [RGB_SIZE - 1:0] temp; 
 initial begin: TEST_VECTORS
@@ -142,27 +170,27 @@ initial begin: TEST_VECTORS
     #2; 
     MCU_TX_RDY <= 1'b0; 
     // begin loading sram with data 
-    for(i = 0; i < 'hFF - 1'h1; i++)begin  // change depending on image size
+    for(i = 0; i < IMAGE_SIZE - 1; ++i)begin  // change depending on image size
         temp = $urandom; 
         external_SPI_data = temp;
         test_vector_sram[i][RGB_SIZE - 1:0] = temp;
         // $display("Inserting %h at addr %h.", external_SPI_data, i); 
         #2; 
-    end    
-    #100;
+    end  
+    @(posedge state == S2_CC1);
     for(m = 0; m < IMAGEY; m++)begin 
         for(n = 0; n < IMAGEX; n++)begin 
-            #1;
+            @(posedge state == S2_CC1);
             run_algor(m, n); 
         end
     end 
-    @(state == S4_CC1); 
+    @(posedge state == S4_CC1);
     $display("Starting comprehensive tests @.", $time);
-    #9;
-    for(i = 0; i < 'hFF - 1'h1; i++)begin  // change depending on image size
+    #3;
+    for(i = 0; i < IMAGE_SIZE; ++i)begin  // change depending on image size
         assert(sram_out_test == test_vector_sram[i][RGB_SIZE - 1:0])
         else begin 
-            $error("Found data mismatch in index %h between expected %h and actual %h.", i, test_vector_sram[i], sram_out_test);
+            $error("Found data mismatch in index %d between expected 0x%h and actual 0x%h.", i, test_vector_sram[i], sram_out_test);
             error_count++; 
         end 
         #2;
@@ -172,7 +200,8 @@ initial begin: TEST_VECTORS
         end
     end   
 
-
+    
+    $stop();
 
     
 end 

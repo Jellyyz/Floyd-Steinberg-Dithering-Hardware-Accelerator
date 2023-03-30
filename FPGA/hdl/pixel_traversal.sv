@@ -25,9 +25,6 @@ always_ff @(posedge clk) begin : COUNTER_ONE_S
     if(rst)begin 
         counter <= '0; 
     end 
-	else if(load_state) begin 
-		counter <= counter + 2'b10;                 
-	end 
     else if(counter_en) begin 
         counter <= counter + 1'b1;                 
     end 

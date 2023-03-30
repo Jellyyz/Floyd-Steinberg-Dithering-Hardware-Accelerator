@@ -26,8 +26,7 @@ module dithering_loop_control
     output logic [IMAGE_ADDR_WIDTH - 1:0] png_idx,
     output states::state_t state, next_state, 
     output logic store_sram, 
-    output logic [1:0] load_sram,
-    output logic load_sram_logic,
+    output logic load_sram,
     output logic full_png_idx
 
 ); 
@@ -36,6 +35,7 @@ logic png_counter_en;
 logic [IMAGE_ADDR_WIDTH - 1:0] pixel_sweeper; 
 logic pixel_traversal_rst; 
 logic dither_rst;
+logic full_png_rst; 
 
     always_ff @ (posedge clk)begin 
         if(rst)begin 
@@ -49,11 +49,20 @@ logic dither_rst;
 
     always_ff @ (posedge clk) begin : FULL_PNG_IDX
         if(rst) begin 
-            full_png_idx <= 1'b0; 
+            full_png_idx <= '0; 
         end 
         else begin
-            full_png_idx <= (png_idx == (IMAGE_SIZE - 1));    
+            full_png_idx <= (png_idx == (IMAGE_SIZE - 1) && ~compute_fin[3]);    
         end 
+    end 
+    always_ff @ (posedge clk) begin : FULL_PNG_RST
+        if(rst) begin 
+            full_png_rst <= '0;
+        end 
+        else begin
+            full_png_rst <= ((png_idx == (IMAGE_SIZE - 2) && store_sram) || (compute_fin[2] && full_png_idx)); 
+        end
+    
     end 
 
 
@@ -103,24 +112,23 @@ logic dither_rst;
                 end 
             end 
             S4_CC1:begin  
-                next_state = S4_CC2; 
-            end 
-            S4_CC2:begin 
                 if(full_png_idx)begin 
-                    next_state = WAIT_FOR_MCU; 
-                end
-                next_state = S4_CC1; 
-            end     
+                    next_state = RESET; 
+                end 
+            end 
+				default:begin 
+					; 
+				end 
         endcase 
     
     end  
     always_comb begin : state_condition 
-        store_old_p = 1'b0; 
-        compare_and_store_n = 1'b0; 
-        compute_fin = 4'b0000;
-        load_sram = 2'b00;
-        store_sram = 1'b0; 
-        dither_rst = 1'b0; 
+        store_old_p = '0; 
+        compare_and_store_n = '0; 
+        compute_fin = '0;
+        load_sram = '0;
+        store_sram = '0; 
+        dither_rst = '0; 
         unique case(state)
             RESET: begin  
                 dither_rst = 1'b1; 
@@ -129,7 +137,9 @@ logic dither_rst;
                 // wait for a signal from the user
             end 
             S1_STORE_IMAGE_SRAM:begin 
-                store_sram = 1'b1; 
+                if(~full_png_idx && ~full_png_rst) begin 
+                    store_sram = 1'b1; 
+                end
             end 
             S2_CC1:begin 
                 store_old_p = 1'b1; 
@@ -137,47 +147,37 @@ logic dither_rst;
             S2_CC2:begin 
                 compare_and_store_n = 1'b1; 
             end
-            S3_CC3:begin // read 
+            S3_CC3:begin 
                 compute_fin = 4'b0001;
             end 
-            S3_CC4:begin // write 
+            S3_CC4:begin 
                 compute_fin = 4'b0010;
             end 
-            S3_CC5:begin // read
+            S3_CC5:begin 
                 compute_fin = 4'b0100;
             end   
-            S3_CC6:begin // write
+            S3_CC6:begin 
                 compute_fin = 4'b1000;
             end 
             S4_CC1:begin 
-                load_sram = 2'b10; 
+                load_sram = 1'b1; 
             end  
-            S4_CC2:begin 
-                load_sram = 2'b01; 
-            end 
+				default:begin 
+					; 
+				end 
 
         endcase 
     end 
+  
     always_comb begin 
-        if(load_sram == 2'b01 || load_sram == 2'b10)begin 
-            load_sram_logic = 1'b1; 
-        end 
-        else begin 
-            load_sram_logic = 1'b0; 
-        end
-    end 
-    always_comb begin 
-        wren_a = ~load_sram_logic && (compare_and_store_n || store_sram && ~full_png_idx || compute_fin[3] || compute_fin[1]); 
-        wren_b = ~load_sram_logic && (compute_fin[3] || compute_fin[1]); 
-        rden_a = store_old_p || load_sram[0] || compute_fin[2] || compute_fin[0]; 
-        rden_b = load_sram[0] || (compute_fin[2] || compute_fin[0]);
+        wren_a = (store_sram && ~full_png_idx) || compute_fin[3] || compute_fin[2] || compute_fin[1] || compare_and_store_n || store_old_p && (png_idx != 0); 
+        wren_b = 1'b0; 
+        rden_a = 1'b0; 
+        rden_b = load_sram || store_old_p || (compute_fin != '0);
         
         
-        pixel_traversal_rst = full_png_idx && (store_sram || compute_fin[3] || load_sram_logic || dither_rst );
-        png_counter_en =  ~load_sram && ~full_png_idx && (store_sram || compute_fin[3]);   // enable pxl address traversal in sram  
-                                                                     // s1
-                                                                     // last step of s3
-                                                                     // when storing back into mcu
+        pixel_traversal_rst = full_png_rst;
+        png_counter_en = ~dither_rst && ~full_png_rst && ~full_png_idx && (store_sram || load_sram || compute_fin[3]);   
         
     end 
 
@@ -186,7 +186,6 @@ logic dither_rst;
 pixel_traversal pixel_traversal(
 
     .clk(clk), .rst(pixel_traversal_rst || rst), 
-    .load_state(load_sram[1]), 
     .counter_en(png_counter_en), .counter(png_idx)
 
 );
@@ -197,9 +196,13 @@ pixel_traversal pixel_traversal(
         if(rst) begin 
             MCU_RX_RDY <= 1'b0; 
         end 
-        else if(load_sram_logic) begin
-            MCU_RX_RDY <= 1'b1;    
+        else if(dither_rst) begin
+            MCU_RX_RDY <= 1'b0; 
         end 
+        else if(load_sram) begin
+            MCU_RX_RDY <= 1'b1;    
+        end
+
     end 
 
 
