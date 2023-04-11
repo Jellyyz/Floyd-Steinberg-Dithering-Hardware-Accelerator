@@ -73,42 +73,46 @@ We had a virtual meeting where we discussed roles and what to do going forward. 
 We are starting the Team Contract and Design Document and need to carefully go through them to determine our project's trajectory going forward.
 
 ## Feb. 20-22, 2023
-Battery discussion with Gruev on Zoom in that one place next to ECEB 
+Battery discussion with Gruev on Zoom while at Beckman Institute. The general advice we got was to purchase trusted batteries (e.g., from this company called Tenergy). Mainly, we want batteries with ICs and protective casing because we're not well-versed on power topics.  
 
 ## Feb. 23, 2023
-Design document finish remote
+We finished the Design Document remotely (Discord meeting to go over it and finish it up).
 
 ## Feb. 25, 2023
-Got ESP dev boards...
+We received the ESP8266 development boards. That means we can start programming basic tests on it through Arduino IDE.
 
 ## Feb. 26, 2023
-Programmed ESP to scan/connect/get request
+I managed to set up the ESP8266 by downloading the appropriate requirements (Arduino IDE, various libraries, CH340 driver, other drivers) and program the ESP8266 to scan nearby networks. I also managed to get it to connect to a 2.4 GHz nearby network given I know its name and password.
 
 ## Feb. 27, 2023
-Design review...
+Today, we did the Design Review presentation. I did not do the Peer Review assignment yet.
 
 ## Feb. 28, 2023
-Meeting... updating on progress... meeting next.
+We met again in a study room on the 2nd floor of ECEB. We receive the thermal printer, and during the meeting, I attend a peer review session.
 
-## March 2,2023
-Meeting at fancy place for document or something I believe
+## March 2, 2023
+Since the Design Document is due soon, we meet at Beckman Institute to work on the Design Document.
 
 ## March 4, 2023
-Meeting at ECEB 1st floor => C imp. progress
+There was a meeting at ECEB's 1st floor (those large tables next to the auditorium).
+There, I looked into dithering given a base64 string describing it. There are many potentially useful libraries and functions for doing so. Promising ones are Apple's base64 string encoding/decoding functions, LodePNG for handling PNG data, LibPNG for the same purpose, and more. 
 
 ## March 5, 2023
-C imp. on MCU
+C++ software implementation on MCU is finished.
+
+We can dither an image on the MCU with these new functions with LodePNG libraries (used to encode bytes describing the PNG file to actual RGB bytes).
 
 ## March 7, 2023
-Meeting after TA on 3rd floor => Trying to fix server and start SPI work
+We met after the 20 minute TA meeting on the 3rd floor of Beckman Institute.
+The goal is to try to fix the server and start SPI work for communication between the MCU and FPGA.
 
 ## March 9, 2023
-Meeting at fancy place at 6 PM
-  Kevin : Server
-  Gally : Parts to buy
-  Jason : SPI
+Meeting at Beckman Institute at 6 PM<br>
+  Kevin : Server<br>
+  Gally : Parts to buy, etc.<br>
+  Jason : SPI controller<br>
 
-Slave
+Slave diagram drawn at Beckman Institute:
 
 ![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Slave.jpg)
 
