@@ -132,6 +132,11 @@ Worked on server -> MCU -> server testing
 ## March 16, 2023
 Finished a working version of server -> MCU -> server testing with small imgs only (can see image on server)
 
+## April 2, 2023
+We received ESP32 development boards. This board is more popular (because it has more pins, has lots of Python users, has more memory) than the ESP8266, I would say. 
+
+With this board, storing the image data is more manageable. Previously, we had around 40 kilobytes to store dynamic variables. Now, with the ESP32, we have a little under 300 kilobytes. This implies that we might be able to store a 512px by 512px image on the MCU if there's sufficient contiguous memory.
+
 ## April 4-5, 2023
 I managed to print out an image with the ESP32 after receiving data from our server. Namely, I started the server up and then uploaded this image:
 
