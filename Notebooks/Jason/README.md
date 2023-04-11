@@ -130,4 +130,14 @@ Worked on imaging HDL, expanding SPI
 Worked on server -> MCU -> server testing
 
 ## March 16, 2023
-Finished a working version of server -> MCU -> server testing with small imgs only 
+Finished a working version of server -> MCU -> server testing with small imgs only (can see image on server)
+
+## April 10, 2023
+SPI protocol seems to work both directions. Specifically, the MCU can send a byte buffer of length some power of 2 to the FPGA (the toy example uses 8 bytes), which stores it to SRAM. Then, the FPGA performs an arbitrary function on the received bytes (i.e., increment the bytes) and then signals that the MCU should pull for the data now. The MCU, who was waiting for this signal, now begins a new buffer transfer by first sending a dummy byte to "align" the FPGA side. Then, a buffer is transferred, which stores to the MCU side. I have verified that the FPGA receives the correct data by reading the values on the hexadecimal displays. I have also verified that the MCU receives the processed bytes by reading the buffer out to the console.
+
+## April 11, 2023
+SPI protocol seems to be repeatable. There is one unexpected behavior, which is the last byte is rewritten to in memory. But this happens after the MCU receives all the bytes already, so we don't care about this "bug".
+
+This is exactly one week from mock demos. 
+
+We met shortly... for meeting.
