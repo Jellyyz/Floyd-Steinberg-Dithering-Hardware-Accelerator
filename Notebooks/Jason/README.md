@@ -132,8 +132,21 @@ Worked on server -> MCU -> server testing
 ## March 16, 2023
 Finished a working version of server -> MCU -> server testing with small imgs only (can see image on server)
 
-## March 27, 2023
+## March 24, 2023
+We compared the hardware dithering (simulation on TestBench) to the software implementation dithering output. I implemented reading in the input to the TestBench and reading out the output. 
+
+Namely, the input to the software implementation is 16 by 16 buffer of bytes:
+
+ins. img
+
+And the output I got was:
+
+ins img
+
+## March 25-27, 2023
 The Individual Progress Report is due pretty soon. While writing it up, I (softly) verified a requirement in our Design Document. Specifically, the hardware accelerator (FPGA) should fully dither an image faster than software implementation (MCU). 
+
+![image](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/individual_report_snippet.PNG)
 
 ## March 28, 2023
 There was a meeting today. Afterward, we received a batch of PCBs and new parts. We went through all the parts one-by-one to confirm if we received everything.
