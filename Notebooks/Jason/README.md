@@ -132,6 +132,12 @@ Worked on server -> MCU -> server testing
 ## March 16, 2023
 Finished a working version of server -> MCU -> server testing with small imgs only (can see image on server)
 
+## March 27, 2023
+The Individual Progress Report is due pretty soon. While writing it up, I (softly) verified a requirement in our Design Document. Specifically, the hardware accelerator (FPGA) should fully dither an image faster than software implementation (MCU). 
+
+## March 28, 2023
+There was a meeting today. Afterward, we received a batch of PCBs and new parts. We went through all the parts one-by-one to confirm if we received everything.
+
 ## March 30-31, 2023
 We met in lab today to formally test out the thermal printer's functions. We use a power supply at around 7.5V in the lab. After playing around with it, some helpful conclusions we made were: plug TX pin of printer to RX pin of MCU and RX pin of printer to TX pin of MCU. Also, our thermal printer expects a serial communication at 9600 baud rate (important). We only managed to successfully print out a test page once out of multiple attempts through programming the MCU. The test page should look like this:
 
