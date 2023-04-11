@@ -132,6 +132,11 @@ Worked on server -> MCU -> server testing
 ## March 16, 2023
 Finished a working version of server -> MCU -> server testing with small imgs only (can see image on server)
 
+## March 30-31, 2023
+We met in lab today to formally test out the thermal printer's functions. We use a power supply at around 7.5V in the lab. After playing around with it, some helpful conclusions we made were: plug TX pin of printer to RX pin of MCU and RX pin of printer to TX pin of MCU. We only managed to successfully print out a test page once out of multiple attempts through programming the MCU. The test page should look like this:
+
+ins. img
+
 ## April 2, 2023
 We received ESP32 development boards. This board is more popular (because it has more pins, has lots of Python users, has more memory) than the ESP8266, I would say. 
 
@@ -158,4 +163,6 @@ SPI protocol seems to be repeatable. There is one unexpected behavior, which is 
 
 This is exactly one week from mock demos. 
 
-We met shortly... for meeting.
+We met shortly... for meeting. We discussed the exchange between the MCU and FPGA at a high level as follows:
+
+<b>insert img here....</b>
