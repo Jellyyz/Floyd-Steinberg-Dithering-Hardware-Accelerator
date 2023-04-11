@@ -135,7 +135,11 @@ Finished a working version of server -> MCU -> server testing with small imgs on
 ## April 4-5, 2023
 I managed to print out an image with the ESP32 after receiving data from our server. Namely, I started the server up and then uploaded this image:
 
+![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Gunjou.png)
+
 Then, the MCU polls for the image, receives the grayscale bytes, and then performs a conversion to black-white bitmap vector. Then, the MCU starts a connection to the printer and sends the data via RX/TX pins. The resulting printout I got was:
+
+![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Gunjou_printout.jpg)
 
 ## April 10, 2023
 SPI protocol seems to work both directions. Specifically, the MCU can send a byte buffer of length some power of 2 to the FPGA (the toy example uses 8 bytes), which stores it to SRAM. Then, the FPGA performs an arbitrary function on the received bytes (i.e., increment the bytes) and then signals that the MCU should pull for the data now. The MCU, who was waiting for this signal, now begins a new buffer transfer by first sending a dummy byte to "align" the FPGA side. Then, a buffer is transferred, which stores to the MCU side. I have verified that the FPGA receives the correct data by reading the values on the hexadecimal displays. I have also verified that the MCU receives the processed bytes by reading the buffer out to the console.
