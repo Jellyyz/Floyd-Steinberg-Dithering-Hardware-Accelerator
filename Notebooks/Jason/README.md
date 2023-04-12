@@ -72,7 +72,7 @@ We had a virtual meeting where we discussed roles and what to do going forward. 
 ## Feb. 17, 2023
 We are starting the Team Contract and Design Document and need to carefully go through them to determine our project's trajectory going forward.
 
-## Feb. 20-22, 2023
+## Feb. 20 - 22, 2023
 Battery discussion with Gruev on Zoom while at Beckman Institute. The general advice we got was to purchase trusted batteries (e.g., from this company called Tenergy). Mainly, we want batteries with ICs and protective casing because we're not well-versed on power topics.  
 
 ## Feb. 23, 2023
@@ -150,7 +150,7 @@ And the output I got was:
 
 ![image](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/sw_output.PNG)
 
-## March 25-27, 2023
+## March 25 - 27, 2023
 The Individual Progress Report is due pretty soon. While writing it up, I (softly) verified a requirement in our Design Document. Specifically, the hardware accelerator (FPGA) should fully dither an image faster than software implementation (MCU). 
 
 ![image](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/individual_report_snippet.PNG)
@@ -158,7 +158,7 @@ The Individual Progress Report is due pretty soon. While writing it up, I (softl
 ## March 28, 2023
 There was a meeting today. Afterward, we received a batch of PCBs and new parts. We went through all the parts one-by-one to confirm if we received everything.
 
-## March 30-31, 2023
+## March 30 - 31, 2023
 We met in lab today to formally test out the thermal printer's functions. We use a power supply at around 7.5V in the lab. After playing around with it, some helpful conclusions we made were: plug TX pin of printer to RX pin of MCU and RX pin of printer to TX pin of MCU. Also, our thermal printer expects a serial communication at 9600 baud rate (important). We only managed to successfully print out a test page once out of multiple attempts through programming the MCU. The test page should look like this:
 
 ![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/test_page.jpg)
@@ -168,7 +168,7 @@ We received ESP32 development boards. This board is more popular (because it has
 
 With this board, storing the image data is more manageable. Previously, we had around 40 kilobytes to store dynamic variables. Now, with the ESP32, we have a little under 300 kilobytes. This implies that we might be able to store a 512px by 512px image on the MCU if there's sufficient contiguous memory.
 
-## April 4-5, 2023
+## April 4 - 5, 2023
 I managed to print out an image with the ESP32 after receiving data from our server. Namely, I started the server up and then uploaded this image:
 
 ![image](https://github.com/Jellyyz/ECE445/blob/main/Notebooks/Jason/Gunjou.png)
@@ -193,4 +193,6 @@ This is exactly one week from mock demos.
 
 We met shortly... for meeting. We discussed the exchange between the MCU and FPGA at a high level as follows:
 
-<b>insert img here....</b>
+![img](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/spi.jpg)
+
+The basic test I have to formulate is to have the MCU receive image data (that is already either black or white) from the server, send all of these bytes to the FPGA, have the FPGA store all of these bytes to SRAM, output the bytes from the FPGA's SRAM out back to the MCU, have the MCU convert the image bytes to a bitmap, and finally, make the MCU transfer the bitmap out to the thermal printer while starting the printer protocols. 
