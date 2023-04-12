@@ -89,3 +89,29 @@ Placed order for parts again since first order didn't go through (?) consisting 
 ## Mar 15, 2023
 Implemented a TCP host connection for the MCU to connect to at upload for an image. Basically, when a user uploads an image the server stores the image, and then using threading it launches another process for establishing a TCP connection to the MCU, which the MCU can connect to through some pretty simple TCP C functions. This process sends in byte (base64 encoded) data to the MCU, and because TCP is a reliable sending protocol the MCU will (theoretically) receive all the data. Once the data has all been transmitted, the server closes the connection until someone else uploads an image again, in which case (assuming the MCU is currently idling and waiting on the server to establish the TCP connection with it) we repeat this process.
 So far, can send pretty big base64 encoded sequences of data, and the sizes of bytes sent and received match, but the serial monitor on the Arduino IDE prints out funny characters sometimes like backward question marks. Will need to look into this issue more later on, but I'm assuming the data is all there still?
+
+## Mar 19, 2023
+I believe the strange characters in the USB serial monitor are showing up because of the baud rate of the monitor. When sending the characters back to the server via TCP to print out to console and verify by eyeballing, it seems like they are all the same so I will assume the data is all correct when received at the microcontroller at the byte level. Online forums also state that it's likely an issue with the speed of the data received and displayed in the serial monitor through the MCU.
+
+
+## Mar 27-29, 2023
+Spent this period working on the individual progress report. Wrote up the introduction, design sections, citations, self assessment, and made diagrams for the wireless subsystem. Had to perform additional RV for the existing wireless subsystem test setup to "prove" that the subsystem functions as necessary, filling in the RV table for user to server upload times. In addition, I calculated the probability that a 10 MB image could be uploaded within the 5s time on IllinoisNet WiFi, given that up to 15 other users are connected to the WiFi network and uploading/downloading their own data at the same time. This should give enough "confidence" that the wireless subsystem will perform as intended, and has a high tolerance to potential congestion in the IllinoisNet WiFi.
+
+## Mar 30, 2023
+Picked up the PCB and began soldering components. One issue that occurred is that Gally and Jason, upon testing the printer, found out that the ESP8266 has weird "pulses" on the pins we intended to use, and this is a problem because we are dealing with digital hardware that relies on the correctness of the input signals (FPGA and printer), especially at startup. We realize this is an issue with the MCU, and we need to find a way to get around this (may just have to replace the MCU entirely if everything fails because this pin behavior is listed in its documentation and there's not a lot of other pins we can easily swap with).
+
+## Apr 1, 2023
+Email sent to Hanyin about the weird ESP8266 issue, but on that note we will probably have to switch to another MCU like the ESP32 or something that has a lot more flexibility (more GPIO pins that are held constant at startup). This switch means our current PCB is also going to be useless, because it's fitted for an ESP8266-12F and the ESP32 has a much bigger footprint, and will set us back another week so if we need a new PCB. The current PCB still hasn't been tested because the ESP8266 probably can't be the long term option anymore because of the weird pin behavior at startup. 
+
+## Apr 3, 2023
+Received the ESP32 dev board from Gally. Started doing basic programming with it just to see how it works, but so far a lot of functionality seems pretty similar to the ESP8266, like connecting to WiFi. Will see more later, but this is likely the MCU we have to stick with for now as Jason is testing with it.
+
+## Apr 4, 2023
+Had meeting with Jason and Hanyin about the issue with the ESP8266 MCU we used before. Talked about clock gating the glitchy pins with stable ones at startup, which is more feasible with the amount of pins on the ESP32, as well as about potential techniques we could use as a last ditch attempt if everything else fails, such as only allowing the system to start up after a certain time period, or reducing the effect that noise (ie. from clock gating) can have in our system using something called a Schmitt Trigger circuit since we are using sensitive hardware.
+
+## Apr 7, 2023
+Order placed for more SMD circuit components and the new ESP32 MCUs (also SMD components for our PCB). Small LCDs with the SSD1306 chip also ordered, so just need to wait until they come in to continue working and testing. Also the new PCB order was placed, so we have to wait on that to actually start soldering again, as well.
+
+## Apr 11, 2023
+Received the black/white LCD from Amazon which uses I2C protocol. Lots of tutorials online entail how to "draw" on the display, and also there are some libraries that allow us to draw bitmaps on the display as well. So far have the display for battery level and status showing without issues, and the code can be integrated pretty easily (call function for "redrawing" display every so often to update screen for user).
+
