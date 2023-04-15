@@ -196,3 +196,18 @@ We met shortly... for meeting. We discussed the exchange between the MCU and FPG
 ![img](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/spi.jpg)
 
 The basic test I have to formulate is to have the MCU receive image data (that is already either black or white) from the server, send all of these bytes to the FPGA, have the FPGA store all of these bytes to SRAM, output the bytes from the FPGA's SRAM out back to the MCU, have the MCU convert the image bytes to a bitmap, and finally, make the MCU transfer the bitmap out to the thermal printer while starting the printer protocols. 
+
+## April 12-14, 2023
+The basic test works in general (for large images, you can make out what it is). For the image
+
+ins img here
+
+I managed to print it out by uploading it to the server, which sends it to the MCU.
+The MCU sends the received stream to the FPGA via SPI, where the FPGA stores it to SRAM. 
+Then, the FPGA outputs everything stored in SRAM back out to the MCU.
+The MCU stores this data and then creates the bitmap based on this data.
+Finally, the MCU begins printing operation.
+
+This is sample printout (note that the black printouts are outputs after changing the program to try to improve it... it did not work, as you can see).
+
+ins. img here too
