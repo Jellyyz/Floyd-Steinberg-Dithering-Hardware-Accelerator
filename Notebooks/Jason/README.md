@@ -216,7 +216,7 @@ As you can see, minute details like single pixels can be seen on the paper if yo
 
 Here is an annotated version of the image to visually explain the different outputs:
 
-https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/print_test_annotated.jpg
+![img](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/print_test_annotated.jpg)
 
 ## April 15, 2023 
 I have added a new function to the current SPI controller. Namely, we can program the MCU to send a signal to the FPGA to asynchronously "reset" (i.e., set signals/variables to what they are defaulted as), which may be useful if the FPGA thinks that it's still receiving bytes when it isn't (we can end the receiving process when the memory addresses "lap" or "loop" and then wait for the asynchronous reset). However, I have not tested this yet. I will test this next week and then try to implement the SPI controller with the dithering algorithm modules.
