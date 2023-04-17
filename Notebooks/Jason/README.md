@@ -197,10 +197,10 @@ We met shortly... for meeting. We discussed the exchange between the MCU and FPG
 
 The basic test I have to formulate is to have the MCU receive image data (that is already either black or white) from the server, send all of these bytes to the FPGA, have the FPGA store all of these bytes to SRAM, output the bytes from the FPGA's SRAM out back to the MCU, have the MCU convert the image bytes to a bitmap, and finally, make the MCU transfer the bitmap out to the thermal printer while starting the printer protocols. 
 
-## April 12-14, 2023
+## April 12 - 14, 2023
 The basic test works in general (for large images, you can make out what it is). For the image
 
-ins img here
+![img](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/print_as_is_sys/team29.png)
 
 I managed to print it out by uploading it to the server, which sends it to the MCU.
 The MCU sends the received stream to the FPGA via SPI, where the FPGA stores it to SRAM. 
@@ -210,4 +210,9 @@ Finally, the MCU begins printing operation.
 
 This is sample printout (note that the black printouts are outputs after changing the program to try to improve it... it did not work, as you can see).
 
-ins. img here too
+![img](https://github.com/Jellyyz/Floyd-Steinberg-Dithering-Hardware-Accelerator/blob/main/Notebooks/Jason/print_test.jpg)
+
+As you can see, minute details like single pixels can be seen on the paper if you look carefully. This test uses a power supply plugged in to the wall at 7.5 V. The brightness of the printed output is decent but sometimes a bit too light (such as the images to the right of the above image).
+
+## April 15, 2023 
+I have added a new function to the current SPI controller. Namely, we can program the MCU to send a signal to the FPGA to asynchronously "reset" (i.e., set signals/variables to what they are defaulted as), which may be useful if the FPGA thinks that it's still receiving bytes when it isn't (we can end the receiving process when the memory addresses "lap" or "loop" and then wait for the asynchronous reset). However, I have not tested this yet. I will test this next week and then try to implement the SPI controller with the dithering algorithm modules.
