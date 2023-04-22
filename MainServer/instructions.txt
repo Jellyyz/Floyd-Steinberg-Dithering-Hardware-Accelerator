@@ -1,0 +1,3 @@
+1. pip install virtualenv
+2. in new venv, pip install Flask, waitress, flask_sockets
+3. run command: waitress-serve --listen=*:8000 main:app

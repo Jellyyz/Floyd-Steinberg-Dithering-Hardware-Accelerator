@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <script>
+        function getFileName()
+        {
+            var file = document.getElementById('file');
+            document.getElementById('divName').innerHTML = '<b> File Selected: ' + file.files.item(0).name + '</b>';
+        }
+    </script>
+
+    <title>Upload to Print</title>
+    <div style="text-align: center;">
+        <h1 style="font-size: 5em;">
+            Upload New File
+        </h1>
+        <h2 style="font-size: 3em; padding: .5em;">
+            Allowed formats: JPG, JPEG, PNG
+        </h2>
+        <form method=post enctype=multipart/form-data>
+            <div style="padding: 2em; max-width: 50%; margin-left: auto; margin-right: auto;">
+                <label style="font-size: 2em; border: 1px solid black; display: block; padding: 1em">
+                    Select Image <input type=file id="file" name=file multiple onchange="getFileName()" style="display: none;">
+                </label>
+            </div>
+            <!-- inject filename here -->
+            <div id="divName" style="word-wrap: break-word;"></div> 
+            <div style="padding: 2em; max-width: 50%; margin-left: auto; margin-right: auto;">
+                <label style="font-size: 2em; border: 1px solid black; display: block; padding: 1em">
+                    Submit <input type=submit value=Submit style="display: none;">
+                </label>
+            </div>
+        </form>
+        <body style="padding: 2em; word-wrap: break-word;">
+            {% for mesg in get_flashed_messages() %}
+            <h1>{{ mesg }}</h1>
+            {% endfor %}
+        </body>
+    </div>
+
+<html>
