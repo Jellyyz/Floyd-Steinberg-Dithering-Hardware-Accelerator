@@ -5,8 +5,8 @@ module finalproj_tb
 # (
 	parameter CLOCK_SPEED = 50000000,
 	parameter PIXEL_COUNTER = 50000000 / CLOCK_SPEED,
-	parameter IMAGEY = 4,
-	parameter IMAGEX = 4,
+	parameter IMAGEY = 16,
+	parameter IMAGEX = 16,
 	parameter IMAGE_SIZE = IMAGEY * IMAGEX,
 	parameter IMAGEYlog2 = $clog2(IMAGEY), 
 	parameter IMAGEXlog2 = $clog2(IMAGEX),
@@ -171,11 +171,14 @@ initial begin: TEST_VECTORS
     MCU_TX_RDY <= 1'b0; 
     // begin loading sram with data 
     for(i = 0; i < IMAGE_SIZE - 1; ++i)begin  // change depending on image size
-        temp = $urandom; 
+
+        temp = 8'hFF; 
         external_SPI_data = temp;
         test_vector_sram[i][RGB_SIZE - 1:0] = temp;
         // $display("Inserting %h at addr %h.", external_SPI_data, i); 
-        #2; 
+        #2;
+    
+
     end  
     @(posedge state == S2_CC1);
     for(m = 0; m < IMAGEY; m++)begin 

@@ -244,18 +244,13 @@ module pixel_algorithm_unit
     logic [8:0] png_data_southeast; 
     assign png_data_east = q_b + ((png_quant_div_16) * 3'b111);
     assign png_data_southwest = q_b + ((png_quant_div_16) * 2'b11);
-    assign png_data_south = ((png_quant_div_16) * 3'b101);
+    assign png_data_south = q_b + ((png_quant_div_16) * 3'b101);
     assign png_data_southeast = q_b + png_quant_div_16;
-    // ~~~~~~~~~~~~~~~ DATA THAT IS BEING WRITTEN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       // ~~~~~~~~~~~~~~~ DATA THAT IS BEING WRITTEN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     always_comb begin: DATA_A_AND_B 
         // w sramse
         if(store_old_p) begin 
-            if(png_data_southeast[8]) begin 
-                data_a = 8'd255; 
-            end 
-            else begin 
-                data_a = png_data_southeast;
-            end 
+            data_a = png_data_southeast;
             data_b = 8'h0; 
         end 
         // need to store the closest pixel back into the sram 
@@ -270,41 +265,32 @@ module pixel_algorithm_unit
         end 
         // w srame
         else if(compute_fin[1]) begin 
-            if(png_data_east[8]) begin 
-                data_a = 8'd255; 
-            end 
-            else begin 
-                data_a = png_data_east;
-            end 
+
+            data_a = png_data_east;
+            
             data_b = 8'h0; 
         end 
         // w xxxx
         else if(compute_fin[2]) begin 
             
-            if(png_data_south[8]) begin 
-                data_a = 8'd255; 
-            end 
-            else begin 
-                data_a = png_data_south;
-            end 
+          
+            data_a = png_data_south;
+          
 
             data_b = 8'h0;  
         end 
         // w xxxx 
         else if(compute_fin[3]) begin 
             
-            if(png_data_southwest[8]) begin 
-                data_a = 8'd255; 
-            end 
-            else begin 
-                data_a = png_data_southwest;
-            end 
+           
+            data_a = png_data_southwest;
+          
 
             data_b = 8'h0; 
         end
         // write into sram
-        else begin 
-            data_a = external_SPI_data;
+        else begin
+            data_a = external_SPI_data; 
             data_b = 8'h0;  
         end 
     end 
@@ -334,14 +320,7 @@ module pixel_algorithm_unit
             png_data_color_buffer_q_error <= '0; 
         end 
         else begin 
-            if(compare_and_store_n)begin 
-                if(q_b < png_data_color_closest)begin 
-                    png_data_color_buffer_q_error <= (png_data_color_closest - q_b);
-                end
-                else begin 
-                    png_data_color_buffer_q_error <= (q_b - png_data_color_closest);
-                end 
-            end 
+            png_data_color_buffer_q_error <= q_b + (~(png_data_color_closest) + 1'b1); 
         end 
 
     end 

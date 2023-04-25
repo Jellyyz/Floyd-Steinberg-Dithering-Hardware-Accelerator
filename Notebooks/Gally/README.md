@@ -92,3 +92,37 @@ It also appears that Kevin has finished the server and I assigned to him to the 
 Jason is assigned the LCD firmware and is responsible for getting that working. He also needs to finish up a SPI controller since the SPI only sends out 1 bit at a time he needs to pack it up to 8 bits a time to be stored inside sram. 
 
 
+## March 20, 2023 
+Team met on discord today to discuss the rest of the scope of the project. The main priority right now is try and get the printer to be able to print data from the microcontroller. There are multiple steps to doing so and the first step is to try to get something to print directly from software without any hardware implementation. 
+
+## March 21- 27, 2023
+
+The rest of the time is spent attempting to finish off the Individual Progress Report. Additionally, we need to try and get the rest of the printer to work so I assigned tasks to Jason and Kevin so they can both work off of the hardware implementation that I suggested. I have recieved word from Jason that a full software implementation currently functions correctly. 
+
+## March 31, 2023
+
+The entire team met in the lab today in order to try and make sufficient progress on the project. There is some issues that have arose after meeting and having the printer work in junction with the microcontroller. It appears that the ESP8266 is unable to have stable outputs whenever it has a start-up sequence which is very unfortunate since the FPGA relies on the MCU being stable in order for it to parse through its state-machine. 
+
+As a group we are deciding to meet first with the course staff for further advice on how to proceed, but we are suggesting that maybe if we change to the ESP32 - it will be easier for us to utilize the MCU since the pins aren't random upon bootup.
+
+This problem also makes it hard to utilize the printer, since the printer is running off a single duplex TX/RX signal so there will be some random characters that print off the printer upon a single upload. 
+
+## April 2, 2023 
+
+ESP 32 Boards have arrived and we are now planning how we shall use it. As for my part I have spent the greater part of the week planning the complete redraw of the PCB. This requires a lot of effort from my part since the ESP32 has a lot more different pins and IO than the 8266, so there would need to be a lot of different types of things to alternate.
+
+Additionally, while I had the chance to remake the PCB, I decided to add a larger copper pour for each of the pins inside of the buck converter. This would allow for us to gain lots of advantages such as heat reduction in our circuit and for a larger voltage output. 
+
+## April 10, 2023 
+
+After countless testing with the rest of the group, we have managed to create a working prototype of the final project by routing the algorithm through the FPGA instead of using the datapath of the microcontroller. This step is crucial because it allows for us to know whenever a full SPI transaction has occured. 
+
+## April 17, 2023
+
+With the new PCBs that have arrived, our group got to work on soldering in the buck converters that are needed for the rest of the circuit to run off of 5v. The FPGA itself has a buck converter that later further scales down the voltage from 5v to 3.3v, but for now we can continue to use the USB to TTL serial converters that have been provided for us at the beginning of the lab.
+
+The only thing left to do now is the important part of getting the FPGA to do most of the software work that has currently been done by the MCU. There is a slight bug in getting this part of the lab to work because the image comes out all shifted so we are digging deep into the verification of the HDL and getting this part fixed. Kevin is in charge of getting the LCD and the battery voltage as well as the box 3d printed.
+
+## April 22, 2023 
+
+We have sucessfully finished the functionality part of the project. The bug that was the issue was attempting to have a pipeline for the reading and writing of the data for the FPGA. We instead opted for a slower but fully functional working project instead. We just need to make it more streamlined by adding in some of the asthetics parts of the project now such as encasing everything inside of the box.
