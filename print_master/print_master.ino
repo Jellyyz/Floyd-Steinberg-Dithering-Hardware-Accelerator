@@ -24,7 +24,7 @@ using namespace std;
 const char *SSID = "DESKTOPDC6RH4K0083";
 const char *PASS = "wX]37869";
 const uint16_t port = 8585;
-const char* host = "192.168.10.8";//"192.168.10.8";
+const char* host = "10.192.175.94";//"192.168.10.8";
 
 const int CONNECTION_LIMIT_INTERVALS = 35;
 const int CONNECTION_INTERVAL_TIME = 250;
@@ -107,7 +107,9 @@ void loop() {
   uint32_t maxBlock;
 
   uint8_t *image_data = nullptr;
-  int true_h = 0, true_w = 0;
+  int true_h_packet[2] = {0, 0};
+  int true_w_packet[2] = {0, 0};
+  int true_w = 0, true_h = 0;
 
   while (true) {
     if (!client.connect(host, port))
@@ -136,15 +138,19 @@ void loop() {
       switch (i) {
         case 0:
           true_w = static_cast<int>(byte_got) << 8;
+          true_w_packet[0] = static_cast<int>(byte_got);
           break;
         case 1:
           true_w += byte_got;
+          true_w_packet[1] = static_cast<int>(byte_got);
           break;
         case 2:
           true_h = static_cast<int>(byte_got) << 8;
+          true_h_packet[0] = static_cast<int>(byte_got);
           break;
         case 3:
           true_h += byte_got;
+          true_h_packet[1] = static_cast<int>(byte_got);
           num_bytes = true_w * true_h;
 
           Serial.println(F("Allocating..."));
@@ -156,8 +162,8 @@ void loop() {
 
            Serial.printf("(SETUP) max block: %5ld\n", maxBlock);
           
-          image_data = new uint8_t[65536] {};
-          Serial.print(F("Allocated image buffer of size 65536 for "));
+          image_data = new uint8_t[66536] {};
+          Serial.print(F("Allocated image buffer of size 66536 for "));
           Serial.println(true_w * true_h);
           break;
         default:
@@ -214,12 +220,20 @@ void loop() {
   delay(5);
 
   SPI_FPGA.beginTransaction(FPGASettings);
-    SPI_FPGA.transfer(true_w);
+    SPI_FPGA.transfer(true_w_packet[0]);
+  SPI_FPGA.endTransaction();
+  delay(5);
+  SPI_FPGA.beginTransaction(FPGASettings);
+    SPI_FPGA.transfer(true_w_packet[1]);
   SPI_FPGA.endTransaction();
   delay(5);
 
   SPI_FPGA.beginTransaction(FPGASettings);
-    SPI_FPGA.transfer(true_h);
+    SPI_FPGA.transfer(true_h_packet[0]);
+  SPI_FPGA.endTransaction();
+  delay(5);
+  SPI_FPGA.beginTransaction(FPGASettings);
+    SPI_FPGA.transfer(true_h_packet[1]);
   SPI_FPGA.endTransaction();
   delay(5);
 
@@ -233,7 +247,7 @@ void loop() {
 
   SPI_FPGA.beginTransaction(FPGASettings);
       digitalWrite(VSPI_SS_FPGA, LOW); 
-      SPI_FPGA.transfer(image_data, 65536);
+      SPI_FPGA.transfer(image_data, 66536);
       digitalWrite(VSPI_SS_FPGA, HIGH);
   SPI_FPGA.endTransaction();
 
@@ -266,36 +280,29 @@ void loop() {
 
   Serial.printf("(SETUP) max block: %5ld\n", maxBlock);
 
-  uint8_t *fpga_data = new uint8_t[65536] {};
+  uint8_t *fpga_data = new uint8_t[66536] {};
 
   SPI_FPGA.beginTransaction(FPGASettings);
     digitalWrite(VSPI_SS_FPGA, LOW); 
-    SPI_FPGA.transfer(fpga_data, 65536);
+    SPI_FPGA.transfer(fpga_data, 66536);
     digitalWrite(VSPI_SS_FPGA, HIGH);
   SPI_FPGA.endTransaction();
 
   Serial.println("Received buffer");
-  for (size_t i = 0; i < true_h; i++) {
-      Serial.print(i);
-      Serial.print(" : ");
-    for (size_t j = 0; j < true_w; j++) {
-      uint8_t c = BitsSetTable256[fpga_data[i * true_w + j] & 0xff];
-      if (c < 4)
-        Serial.print(" 1 ");
-      else  
-        Serial.print(" 0 ");
+  if (true_w * true_h <= 2048) {
+    for (size_t i = 0; i < true_h; i++) {
+        Serial.print(i);
+        Serial.print(" : ");
+      for (size_t j = 0; j < true_w; j++) {
+        uint8_t c = BitsSetTable256[fpga_data[i * true_w + j] & 0xff];
+        if (c < 2)
+          Serial.print(" 1 ");
+        else  
+          Serial.print(" 0 ");
+      }
+      Serial.println("");
     }
-    Serial.println("");
   }
-
-  
-  Serial.println("");
-
-  for (size_t i = true_w; i < true_w * 2; i++) {
-    Serial.print(fpga_data[i]);
-    Serial.print(",");
-  }
-  Serial.println("");
 
   // Verifier pt. 2:
   /*
@@ -329,7 +336,7 @@ void loop() {
 
   for (int pixel_num = 0, bitmap_idx = 0, bit_index = 7, pixel_x = 0, pixel_y = 0; pixel_num < 65536, pixel_y < true_h; pixel_num++) {
     uint8_t c = BitsSetTable256[fpga_data[pixel_num] & 0xff];
-    if (c < 4) {
+    if (c < 2) {
       fpga_bitmap[bitmap_idx] |= (uint8_t) (1 << bit_index);
     }
 
