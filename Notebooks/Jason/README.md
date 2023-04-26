@@ -228,4 +228,6 @@ The system loops for the most part (I've witnessed it fail one time out of proba
 I modified a lot of logic on MCU side (bitmap formation, server communication, and packet-like protocol) and FPGA side (dithering algorithm conditionals, packet-like protocol) so that any image (with the proper extension) uploaded to the server can be printed (at least, to my knowledge) regardless of size. We bounded the total image size within 66536 pixels because the FPGA memory is bounded to this amount. Therefore, any image above this size is approximately resized to this boundary and then printed. 
 
 ## April 25, 2023
-We are meeting for the final time before the final demo tomorrow. 
+We are meeting for the final time before the final demo tomorrow.
+
+We are attempting to flash the FPGA and finish the system. All of us worked on flashing and placing wires on the PCB. I also quickly modified the HDL on the FPGA to accept a switchbox that modifies the dithering algorithm. 
