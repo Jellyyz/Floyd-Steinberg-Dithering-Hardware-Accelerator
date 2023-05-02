@@ -4,4 +4,4 @@
 
 https://www.youtube.com/watch?v=ZJqiJV0miBM
 
-[![Printer Video](https://img.youtube.com/vi/ZJqiJV0miBM/0.jpg)](https://www.youtube.com/watch?v=-pjRKaqpoLw)
+[![Printer Video](https://img.youtube.com/vi/ZJqiJV0miBM/0.jpg)](https://www.youtube.com/watch?v=ZJqiJV0miBM)
