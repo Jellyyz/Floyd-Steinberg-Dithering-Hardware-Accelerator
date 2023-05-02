@@ -51,7 +51,8 @@ module pixel_algorithm_unit2
 		  output logic [IMAGE_ADDR_WIDTH - 1:0] png_idx_out,
 		  output logic await_out,
           output logic [8:0] true_w_out,
-          output logic [8:0] true_h_out
+          output logic [8:0] true_h_out,
+			 input logic [9:0] algorithm
     );
     assign true_h_out = true_h;
     assign true_w_out = true_w;
@@ -377,14 +378,15 @@ module pixel_algorithm_unit2
         end
     end
 
-    logic [8:0] true_w, true_h;
+    logic [15:0] true_w, true_h;
     logic initiate = 1'b1;
     logic [7:0] num_gos_reg = 8'hFF;
 
-    logic [2:0] idx_w = 0, idx_h = 0, idx_await = 0, idx_sz = 0;
+    logic [3:0] idx_w = 0, idx_h = 0;
+	 logic [2:0] idx_await = 0, idx_sz = 0;
     assign num_gos = num_gos_reg;
 
-    logic [15:0] true_image_size;
+    logic [31:0] true_image_size;
 
     logic scan_w = 1'b1, scan_h = 1'b1, compute_sz = 1'b1;
     always_ff @ (posedge SPI_CLK)
@@ -412,16 +414,16 @@ module pixel_algorithm_unit2
 			end
         end
         else if (scan_w == 1) begin
-			true_w <= {true_w[7:0], SPI_MOSI};
+			true_w <= {true_w[15:0], SPI_MOSI};
 			idx_w <= idx_w + 1;
-            if (idx_w == 7) begin
+            if (idx_w == 15) begin
                 scan_w <= 0;
             end
 		end
         else if (scan_h == 1) begin
-			true_h <= {true_h[7:0], SPI_MOSI};
+			true_h <= {true_h[15:0], SPI_MOSI};
 			idx_h <= idx_h + 1;
-            if (idx_h == 7) begin
+            if (idx_h == 15) begin
                 scan_h <= 0;
             end
 		end
@@ -543,11 +545,40 @@ module pixel_algorithm_unit2
     assign png_data_southwest = q_b + sw >> 4;
     assign png_data_south = q_b + s >> 4 ;
     assign png_data_southeast = q_b + png_quant_div_16 ;
+	 
     */
-    assign png_data_east = q_b + ((png_data_color_buffer_q_error * 3'b111) >> 4);
-    assign png_data_southwest = q_b + ((png_data_color_buffer_q_error * 2'b11) >> 4);
-    assign png_data_south = q_b + ((png_data_color_buffer_q_error * 3'b101) >> 4);
-    assign png_data_southeast = q_b + png_quant_div_16;
+	 always_comb begin: ALGORITHM_SWITCHBOX
+		unique case (algorithm)
+			10'b0000000001:begin
+			// Threshold
+				png_data_east = q_b;
+				png_data_southwest = q_b;
+				png_data_south = q_b;
+				png_data_southeast = q_b;
+			end
+			10'b0000000010:begin
+			// Sierra (3)
+				png_data_east = q_b + ((png_data_color_buffer_q_error * 2'b10) >> 2);
+				png_data_southwest = q_b + ((png_data_color_buffer_q_error) >> 2);
+				png_data_south = q_b + ((png_data_color_buffer_q_error) >> 2);
+				png_data_southeast = q_b;
+			end
+			10'b0000000100:begin
+			// Fake Floyd-Steinberg Dithering
+				png_data_east = q_b + ((png_data_color_buffer_q_error * 2'b11) >> 3);
+				png_data_southwest = q_b;
+				png_data_south = q_b + ((png_data_color_buffer_q_error * 2'b11) >> 3);
+				png_data_southeast = q_b + ((png_data_color_buffer_q_error * 2'b10) >> 3);
+			end
+			default:begin
+			// Floyd-Steinberg Dithering
+				png_data_east = q_b + ((png_data_color_buffer_q_error * 3'b111) >> 4);
+				png_data_southwest = q_b + ((png_data_color_buffer_q_error * 2'b11) >> 4);
+				png_data_south = q_b + ((png_data_color_buffer_q_error * 3'b101) >> 4);
+				png_data_southeast = q_b + png_quant_div_16;
+			end
+		endcase
+	 end
     
 /*
     assign png_data_east = q_b + ((png_quant_div_16 * 3'b111));

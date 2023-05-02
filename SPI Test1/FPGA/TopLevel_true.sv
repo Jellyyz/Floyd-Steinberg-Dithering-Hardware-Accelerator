@@ -98,9 +98,9 @@ module TopLevel_true
 
 	HexDriver hex_driver5 (q_b_out[7:4], HEX5[6:0]);
 	HexDriver hex_driver4 (q_b_out[3:0], HEX4[6:0]);
-	HexDriverDot hex_driver3 (true_h_out[7:4], HEX3[6:0], ~(true_h_out[8]), HEX3[7]); 
+	//HexDriverDot hex_driver3 (true_h_out[7:4], HEX3[6:0], ~(true_h_out[8]), HEX3[7]); 
 	HexDriver hex_driver2 (true_h_out[3:0], HEX2[6:0]);
-	HexDriverDot hex_driver1 (true_w_out[7:4], HEX1[6:0], ~(true_w_out[8]), HEX1[7]);
+	//HexDriverDot hex_driver1 (true_w_out[7:4], HEX1[6:0], ~(true_w_out[8]), HEX1[7]);
 	HexDriver hex_driver0 (true_w_out[3:0], HEX0[6:0]);
 
 	logic slow_clk = 1'b0;
@@ -160,7 +160,8 @@ module TopLevel_true
 		.png_idx_out(png_idx_out),
 		.await_out(await_out),
 		.true_w_out(true_w_out),
-		.true_h_out(true_h_out)
+		.true_h_out(true_h_out),
+		.algorithm(SW[9:0])
 	);
 	assign LED[0] = read_on_out;
 

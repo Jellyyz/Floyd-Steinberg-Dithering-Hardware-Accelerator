@@ -24,7 +24,7 @@ def launchServer(args):
     image = Image.open(UPLOAD_FOLDER + "/" + args).convert("L")
     image.save(UPLOAD_FOLDER + "/" + "expected_grey.png")
     enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2.5)
+    #image = enhancer.enhance(1.5)
     image.save(UPLOAD_FOLDER + "/" + "expected_big.png")
     
     data = numpy.asarray(image)
