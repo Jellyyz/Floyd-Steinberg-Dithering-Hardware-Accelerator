@@ -144,7 +144,7 @@ Also had mock demo today, where we showed Hanyin our progress thus far. Demonstr
 
 ## Apr 18, 2023
 Just tested the battery a lot to make sure the voltage doesn't jump or anything when plugged into something, so it seems fine. It is still at 7.4V, just like when we got it initially, and after plugging it into the buck converter circuit, the output is a steady 5V as expected, and it turns the FPGA on without any problems! <br>
-![image](https://user-images.githubusercontent.com/61933430/236144334-bec4e7d2-dbfd-4568-8e30-16f8d94eecec.png) <br>
+![image](https://user-images.githubusercontent.com/61933430/236161290-df44080c-4e3f-4127-954a-d8181fe8c6b6.png) <br>
 This is all I have to verify for now on the Power Subsystem. Just need to design the 3D CAD printer container, which shouldn't be too bad.
 
 ## Apr 21, 2023
