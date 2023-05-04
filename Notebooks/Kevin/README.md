@@ -115,3 +115,55 @@ Order placed for more SMD circuit components and the new ESP32 MCUs (also SMD co
 ## Apr 11, 2023
 Received the black/white LCD from Amazon which uses I2C protocol. Lots of tutorials online entail how to "draw" on the display, and also there are some libraries that allow us to draw bitmaps on the display as well. So far have the display for battery level and status showing without issues, and the code can be integrated pretty easily (call function for "redrawing" display every so often to update screen for user).
 
+## Apr 14, 2023
+Started soldering components onto new PCB Gally ordered. This process took several hours, including manually hand soldering, learning how to use the stencil and baking the PCB with the reflow oven (for the buck converter and ESP32 MCU). Also had to create a ~41 kOhm resistor out of some film resistors in the drawers because we didn't have the SMD component for it. Anyways, we had to adjust the PCB a bit because the 5V connection we have to the ADC pin on the MCU for reading is too high, and anything above 3.3V according to the documentation will kill the pin and potentially the MCU itself so we just broke the connection between the MCU and power subsystem part by crushing the SMD resistors in between them. 
+Trying to program the ESP32 on the PCB now directly using a USB-TTL programmer. We follow a simple schematic as follows through the tutorial at https://techtutorialsx.com/2017/06/05/esp-wroom-32-uploading-a-program-with-arduino-ide/: 
+![alt text](https://i0.wp.com/techtutorialsx.com/wp-content/uploads/2017/05/esp-wroom-32-programming-circuit.png)<br>
+So far it does not work for more than 1 upload of code, every other attempt the Arduino IDE says something about an "Invalid head of packet" for some reason. Will figure it out tomorrow
+
+## Apr 15, 2023
+After much guessing and checking, the ESP32 on the PCB can be programmed, but in a very specific order as follows:
+- Power off/unplug the MCU from the USB TTL programmer, then plug it back in
+- Make sure IO0 is connected to ground
+- Upload the code to the MCU like normal, the chip should be in boot mode and accept a program flash
+- Unplug the IO0 connection to ground (this part is important for the chip to run the actual code)
+- Power off/unplug the MCU from the USB TTL programmer, and plug it back in. As it powers on, it should run the code just like the dev board does, like connecting to WiFi.
+
+This is important for the project because once Jason completes the SPI controller we can proceed with flashing the code to the MCU and integrating all the systems together for the demo.<br>
+![image](https://user-images.githubusercontent.com/61933430/236138135-1efe1641-0196-4170-ac63-91720d48d2c5.png)<br>
+The first code I got to run on the PCB embedded ESP32.
+
+## Apr 17, 2023
+Tested the power regulator circuit of the Power Subsystem today using a power generator machine in the lab. With the voltage set to 7.4V, plugged into the Vin of the application circuit, we were able to read a constant output voltage of 5V within +- .01, which is a great sign that this system works as specified. We also tested it on a range of voltages from the power supply between 7-8V and the output voltage hardly changed at all, as expected according to documentation but was pretty cool to see actually working. Will test with the actual lipo batteries later, hopefully it works. <br>
+Also had mock demo today, where we showed Hanyin our progress thus far. Demonstrated that the power regulator could output a constant 5V DC, and that we could power the FPGA directly using this now, instead of plugging it in via USB to a computer or USB wall adapter. Also Jason demonstrated the Flask web server again and how it can interact with the MCU to print an image out, although without hardware acceleration so far but we are close to getting the MCU working all good with the FPGA.
+
+## Apr 18, 2023
+Just tested the battery a lot to make sure the voltage doesn't jump or anything when plugged into something, so it seems fine. It is still at 7.4V, just like when we got it initially, and after plugging it into the buck converter circuit, the output is a steady 5V as expected, and it turns the FPGA on without any problems! <br>
+![image](https://user-images.githubusercontent.com/61933430/236144334-bec4e7d2-dbfd-4568-8e30-16f8d94eecec.png) <br>
+This is all I have to verify for now on the Power Subsystem. Just need to design the 3D CAD printer container, which shouldn't be too bad.
+
+## Apr 21, 2023
+Have a simple CAD design ready and can submit a print job to a 3D printing lab on campus, but the problem is that these places all estimate at least $30 to print the design, which is kind of expensive for something that just holds all our components anyways and goes beyond budget. The CAD model looks like this: <br>
+![image](https://user-images.githubusercontent.com/61933430/236145626-11583d13-49e9-4670-a94d-81e5ee36ec64.png) <br>
+Just the base, walls, and lid, and has some "strategically placed" holes for allowing paper and charging cables to feed in through. Will look for alternatives that are free or < $30, at least.
+
+## Apr 22, 2023
+Found a place on campus that allows for free printing but apparently you need to be an art student to use it. A machine called the "Zortrax M200 plus", where they do the free printing only if you CAD and slice a model already in something called a "zcodex2" type file. I will have to learn how to actually do this, since I thought it would just be submitting the stl files and calling it a day.
+
+## Apr 23, 2023
+Had to install some software called the "Zortrax Z-Suite" to create the zcodex2 file, and uploaded the pre-existing stl file and had to do a bunch of things for slicing the design like specify infill %, which I guess is the density of the filling of the printed parts, and the nozzle diameter at .4 mm, and the pattern of the fill. You can read about it here: https://art.illinois.edu/about/resources-for-current-students/facilities/digital-labs/tutorials-templates/tutorial-preparing-3d-print-files-for-the-zortrax-printers/.
+Also Gally said he found someone who could submit the print job and we can hopefully get it before the demo, but otherwise we'll have to demo in the reused tin container that the printer already lives in.
+
+## Apr 25, 2023
+Final push to get the project all together. According to the person who submitted the print job, it just got out of the queue and started printing (at night), so we probably won't get it in time for the demo since the estimated print job time was at least 1 day according to the Z-Suite software. Jason and Gally have the FPGA and MCU working together now, so we need to put the dev board code on the PCB MCU and run everything off the power subsystem. <br>
+
+Gally and Jason were able to make slight last minute debugging modifications in some code and now we have the completed "final" product, which is the functional wireless and battery powered printer that uses the programmed embedded MCU for system control and the FPGA for hardware dithering. Only issue is the 3D printed box still for presentational purposes, but at least our demo will work, also I killed my laptop on accident when working on additional features which sucks a lot. I will elaborate when I don't feel as bad about it later.
+
+* Update:
+Okay so here's the laptop killed story: when trying to create a voltage divider to read battery level from the ESP32's ADC pin (on a dev board for testing), I had the 3.3 V line and ground on the MCU plugged into the breadboard + and - rails, and after finding (what I hope were) satisfactory mappings for the ADC readings to battery voltage levels and testing using the 3.3 V line just to be safe (since the ADC pin will fry if connected to anything above 3.3 V), I accidentally plugged the 8V lipo battery into the same 3.3 V and ground line from the MCU because I blanked that something was already plugged into the + - rails. Anyways, right after this happened my laptop turned off and the blue MCU LED turned off and the metal lid on the chip got hot, so that means I definitely fried it. Also my laptop wouldn't turn on and I had to get a friend to open the thing so I could drain the battery and all the power in the laptop apparently, and it turned back on but it seemed like my code didn't save. I did some research about this and apparently this happened when connecting the battery in parallel to the 3.3V line, and on the dev board we used there is no backward current protection and this was connected directly to my USB V+ and GND line. From what I read, when a battery is in parallel it'll try to discharge current until the voltages are balanced, but this is bad because I think this current went straight back into my laptop and it just died, all in under 1 second. Apparently only "high end" MCUs have isolated voltage lines or something, but either way this caused a lot of stress and wasted half a day's worth of progress of additional features. This also ruined the battery, because now it just starts smoking (concerning) when we try to plug it into anything like a simple voltage divider, and it can't be charged anymore since the default charger LED indicates that it's fully charged (also concerning), so now our theoretical maximum energy capacity is safely halved from 4000mAh to 2000mAh since we were planning on connecting the 2 battery packs in parallel to have longer battery life. Anyways, end of rant, moral of the story: triple check every connection you have in a breadboard or circuit before sticking something new in, be extra careful when dealing with something like a battery (especially one capable of high discharge rate), and it's probably best to unpower/unplug every important expensive connection beforehand. <br>
+
+* Update again:
+The 3D printed parts came in, but it's 5 days after the demo now as of typing this. They look cool I guess, but it's a bit late unfortunately. You get what you pay for. <br>
+![image](https://cdn.discordapp.com/attachments/1070173249180287072/1102695654289063936/20230501_153825.png)
+
+
