@@ -95,12 +95,17 @@ Placed order for parts again since first order didn't go through (?) consisting 
 Implemented a TCP host connection for the MCU to connect to at upload for an image. Basically, when a user uploads an image the server stores the image, and then using threading it launches another process for establishing a TCP connection to the MCU, which the MCU can connect to through some pretty simple TCP C functions. This process sends in byte (base64 encoded) data to the MCU, and because TCP is a reliable sending protocol the MCU will (theoretically) receive all the data. Once the data has all been transmitted, the server closes the connection until someone else uploads an image again, in which case (assuming the MCU is currently idling and waiting on the server to establish the TCP connection with it) we repeat this process.
 So far, can send pretty big base64 encoded sequences of data, and the sizes of bytes sent and received match, but the serial monitor on the Arduino IDE prints out funny characters sometimes like backward question marks. Will need to look into this issue more later on, but I'm assuming the data is all there still?
 
+![progressreport-Page-2 drawio](https://user-images.githubusercontent.com/61933430/236315980-dad62df2-60a8-47d1-8704-55aa97da6375.png)
+<br> Flow chart diagram for server control
+
 ## Mar 19, 2023
 I believe the strange characters in the USB serial monitor are showing up because of the baud rate of the monitor. When sending the characters back to the server via TCP to print out to console and verify by eyeballing, it seems like they are all the same so I will assume the data is all correct when received at the microcontroller at the byte level. Online forums also state that it's likely an issue with the speed of the data received and displayed in the serial monitor through the MCU.
 
 
 ## Mar 27-29, 2023
 Spent this period working on the individual progress report. Wrote up the introduction, design sections, citations, self assessment, and made diagrams for the wireless subsystem. Had to perform additional RV for the existing wireless subsystem test setup to "prove" that the subsystem functions as necessary, filling in the RV table for user to server upload times. In addition, I calculated the probability that a 10 MB image could be uploaded within the 5s time on IllinoisNet WiFi, given that up to 15 other users are connected to the WiFi network and uploading/downloading their own data at the same time. This should give enough "confidence" that the wireless subsystem will perform as intended, and has a high tolerance to potential congestion in the IllinoisNet WiFi.
+
+
 
 ## Mar 30, 2023
 Picked up the PCB and began soldering components. One issue that occurred is that Gally and Jason, upon testing the printer, found out that the ESP8266 has weird "pulses" on the pins we intended to use, and this is a problem because we are dealing with digital hardware that relies on the correctness of the input signals (FPGA and printer), especially at startup. We realize this is an issue with the MCU, and we need to find a way to get around this (may just have to replace the MCU entirely if everything fails because this pin behavior is listed in its documentation and there's not a lot of other pins we can easily swap with).
