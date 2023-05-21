@@ -1,4 +1,0 @@
-Info (10281): Verilog HDL Declaration information at pixel_traversal.sv(16): object "pixel_sweeper" differs only in case from object "PIXEL_SWEEPER" in the same scope File: C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_traversal.sv Line: 16
-Warning (10273): Verilog HDL warning at HexdriverOverload.sv(14): extended using "x" or "z" File: C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/HexdriverOverload.sv Line: 14
-Warning (10273): Verilog HDL warning at Hexdriver.sv(25): extended using "x" or "z" File: C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/Hexdriver.sv Line: 25
-Info (10281): Verilog HDL Declaration information at dithering_loop_control.sv(6): object "store_old_p" differs only in case from object "STORE_OLD_P" in the same scope File: C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/dithering_loop_control.sv Line: 6

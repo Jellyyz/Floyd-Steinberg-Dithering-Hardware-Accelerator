@@ -1,0 +1,339 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Users/gally/Desktop/445/ECE445/FPGA/simulation/modelsim
+vdithering_loop_control
+Z1 DXx6 sv_std 3 std 0 22 AD7iAPLo6nTIKk<N0eo=D3
+Z2 DXx4 work 6 states 0 22 ?7ZdIJcATmEEJS1eKBFM=1
+DXx4 work 30 dithering_loop_control_sv_unit 0 22 ]ikR<b8n<khhmVdo65Sn72
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+r1
+!s85 0
+31
+!i10b 1
+!s100 h2MVC4OToZ<OebE;>kNMB0
+I=d`;Vo0PeVLGLP9zl=<EL2
+!s105 dithering_loop_control_sv_unit
+S1
+R0
+Z4 w1681767971
+Z5 8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/dithering_loop_control.sv
+Z6 FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/dithering_loop_control.sv
+L0 3
+Z7 OV;L;10.5b;63
+Z8 !s108 1681880372.000000
+Z9 !s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/dithering_loop_control.sv|
+Z10 !s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/dithering_loop_control.sv|
+!i113 1
+Z11 o-sv -work work
+Z12 !s92 -sv -work work +incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl
+Z13 tCvgOpt 0
+Xdithering_loop_control_sv_unit
+R1
+R2
+V]ikR<b8n<khhmVdo65Sn72
+r1
+!s85 0
+31
+!i10b 1
+!s100 AHU]KXkNEM[DFXmFo7U_A3
+I]ikR<b8n<khhmVdo65Sn72
+!i103 1
+S1
+R0
+R4
+R5
+R6
+L0 2
+R7
+R8
+R9
+R10
+!i113 1
+R11
+R12
+R13
+vfinalproj_tb
+R1
+R2
+DXx4 work 20 finalproj_tb_sv_unit 0 22 MePhIn_ZhzkoGnBUU7V?I2
+R3
+r1
+!s85 0
+31
+!i10b 1
+!s100 oN5mnT_>E^QDH8C7RMMAB1
+IX8o4]8K7S`Le3ZV?XeAQO1
+!s105 finalproj_tb_sv_unit
+S1
+R0
+Z14 w1681880370
+Z15 8C:/Users/gally/Desktop/445/ECE445/FPGA/hvl/finalproj_tb.sv
+Z16 FC:/Users/gally/Desktop/445/ECE445/FPGA/hvl/finalproj_tb.sv
+L0 4
+R7
+R8
+Z17 !s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hvl/finalproj_tb.sv|
+Z18 !s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hvl|C:/Users/gally/Desktop/445/ECE445/FPGA/hvl/finalproj_tb.sv|
+!i113 1
+R11
+Z19 !s92 -sv -work work +incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hvl
+R13
+Xfinalproj_tb_sv_unit
+R1
+R2
+VMePhIn_ZhzkoGnBUU7V?I2
+r1
+!s85 0
+31
+!i10b 1
+!s100 olRON<@dg`b[3D7f:O;<U2
+IMePhIn_ZhzkoGnBUU7V?I2
+!i103 1
+S1
+R0
+R14
+R15
+R16
+L0 3
+R7
+R8
+R17
+R18
+!i113 1
+R11
+R19
+R13
+vHexDriver
+R1
+Z20 !s110 1681880371
+!i10b 1
+!s100 _ZQUico38XUXiZHnJi:4]3
+I`?0jBKE`c]bE[doGzkM7P2
+R3
+!s105 Hexdriver_sv_unit
+S1
+R0
+w1676616077
+8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/Hexdriver.sv
+FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/Hexdriver.sv
+L0 1
+R7
+r1
+!s85 0
+31
+Z21 !s108 1681880371.000000
+!s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/Hexdriver.sv|
+!s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/Hexdriver.sv|
+!i113 1
+R11
+R12
+R13
+n@hex@driver
+vHexDriverD
+R1
+R20
+!i10b 1
+!s100 J7ZD`QBHa21TW=cTMJiHM1
+I5m??<KZf:E:FL06GZ37@81
+R3
+!s105 HexdriverOverload_sv_unit
+S1
+R0
+w1678901633
+8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/HexdriverOverload.sv
+FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/HexdriverOverload.sv
+L0 5
+R7
+r1
+!s85 0
+31
+R21
+!s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/HexdriverOverload.sv|
+!s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/HexdriverOverload.sv|
+!i113 1
+R11
+R12
+R13
+n@hex@driver@d
+vmem_block
+R20
+!i10b 1
+!s100 Zgh61XM_dKMVdX[4^8oDd0
+I_^NidjEI7`7on]Z=z6mKL1
+R3
+R0
+R4
+8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/mem_block.v
+FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/mem_block.v
+L0 39
+R7
+r1
+!s85 0
+31
+R21
+!s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/mem_block.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/mem_block.v|
+!i113 1
+o-vlog01compat -work work
+!s92 -vlog01compat -work work +incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl
+R13
+vpixel_algorithm_unit
+R1
+R2
+DXx4 work 28 pixel_algorithm_unit_sv_unit 0 22 FD[54C^mIRKTf<zXnDlGJ0
+R3
+r1
+!s85 0
+31
+!i10b 1
+!s100 oO>3Ah=l]AeI1JUlO0RlE2
+ImV3k77oXg[IIh@zM9aJ_D2
+!s105 pixel_algorithm_unit_sv_unit
+S1
+R0
+Z22 w1681871745
+Z23 8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_algorithm_unit.sv
+Z24 FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_algorithm_unit.sv
+L0 5
+R7
+R21
+Z25 !s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_algorithm_unit.sv|
+Z26 !s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_algorithm_unit.sv|
+!i113 1
+R11
+R12
+R13
+Xpixel_algorithm_unit_sv_unit
+R1
+R2
+VFD[54C^mIRKTf<zXnDlGJ0
+r1
+!s85 0
+31
+!i10b 1
+!s100 4^j>99;?D;N;=;E1;_:K22
+IFD[54C^mIRKTf<zXnDlGJ0
+!i103 1
+S1
+R0
+R22
+R23
+R24
+L0 4
+R7
+R21
+R25
+R26
+!i113 1
+R11
+R12
+R13
+vpixel_traversal
+R1
+R20
+!i10b 1
+!s100 N1NX@S@EY=WQB:Y0AOhf30
+I4SAnZJ?JJ8Xi6AMIblhTM1
+R3
+!s105 pixel_traversal_sv_unit
+S1
+R0
+R4
+8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_traversal.sv
+FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_traversal.sv
+L0 1
+R7
+r1
+!s85 0
+31
+R21
+!s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_traversal.sv|
+!s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/pixel_traversal.sv|
+!i113 1
+R11
+R12
+R13
+Xstates
+R1
+R20
+!i10b 1
+!s100 oR[<E7L6L^k4fbPVb<bh33
+I?7ZdIJcATmEEJS1eKBFM=1
+V?7ZdIJcATmEEJS1eKBFM=1
+S1
+R0
+R4
+Z27 8C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/TopLevel.sv
+Z28 FC:/Users/gally/Desktop/445/ECE445/FPGA/hdl/TopLevel.sv
+L0 5
+R7
+r1
+!s85 0
+31
+R21
+Z29 !s107 C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/TopLevel.sv|
+Z30 !s90 -reportprogress|300|-sv|-work|work|+incdir+C:/Users/gally/Desktop/445/ECE445/FPGA/hdl|C:/Users/gally/Desktop/445/ECE445/FPGA/hdl/TopLevel.sv|
+!i113 1
+R11
+R12
+R13
+vTopLevel
+R1
+R2
+DXx4 work 16 TopLevel_sv_unit 0 22 Jmk^Po=AETM1I8S?@kIFb2
+R3
+r1
+!s85 0
+31
+!i10b 1
+!s100 dGRTZiNZo2Hj>OOMlJRfP1
+I1Qk^9Y55gAiKLX=BC8Hf11
+!s105 TopLevel_sv_unit
+S1
+R0
+R4
+R27
+R28
+L0 24
+R7
+R21
+R29
+R30
+!i113 1
+R11
+R12
+R13
+n@top@level
+XTopLevel_sv_unit
+R1
+R2
+VJmk^Po=AETM1I8S?@kIFb2
+r1
+!s85 0
+31
+!i10b 1
+!s100 J;^DE^_M>GWN^kUOdNN>O2
+IJmk^Po=AETM1I8S?@kIFb2
+!i103 1
+S1
+R0
+R4
+R27
+R28
+L0 23
+R7
+R21
+R29
+R30
+!i113 1
+R11
+R12
+R13
+n@top@level_sv_unit
