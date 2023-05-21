@@ -21,6 +21,8 @@ module pixel_algorithm_unit
         // 50 mhz clock  
         input logic clk, rst, 
         input logic [RGB_SIZE - 1:0] external_SPI_data,
+        // trigger start 
+        
         input logic MCU_TX_RDY, 
 
         output logic MCU_RX_RDY,

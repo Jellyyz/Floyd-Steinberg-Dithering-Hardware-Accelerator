@@ -220,3 +220,14 @@ Here is an annotated version of the image to visually explain the different outp
 
 ## April 15, 2023 
 I have added a new function to the current SPI controller. Namely, we can program the MCU to send a signal to the FPGA to asynchronously "reset" (i.e., set signals/variables to what they are defaulted as), which may be useful if the FPGA thinks that it's still receiving bytes when it isn't (we can end the receiving process when the memory addresses "lap" or "loop" and then wait for the asynchronous reset). However, I have not tested this yet. I will test this next week and then try to implement the SPI controller with the dithering algorithm modules.
+
+## April 16 - 21, 2023
+The system loops for the most part (I've witnessed it fail one time out of probably hundreds of times). Also, I've modified the FPGA's dithering algorithm so that output images aren't inverted (they were inverted previously for some reason).
+
+## April 22 - 23, 2023
+I modified a lot of logic on MCU side (bitmap formation, server communication, and packet-like protocol) and FPGA side (dithering algorithm conditionals, packet-like protocol) so that any image (with the proper extension) uploaded to the server can be printed (at least, to my knowledge) regardless of size. We bounded the total image size within 66536 pixels because the FPGA memory is bounded to this amount. Therefore, any image above this size is approximately resized to this boundary and then printed. 
+
+## April 25, 2023
+We are meeting for the final time before the final demo tomorrow.
+
+We are attempting to flash the FPGA and finish the system. All of us worked on flashing and placing wires on the PCB. I also quickly modified the HDL on the FPGA to accept a switchbox that modifies the dithering algorithm. 

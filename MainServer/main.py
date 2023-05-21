@@ -24,7 +24,7 @@ def launchServer(args):
     image = Image.open(UPLOAD_FOLDER + "/" + args).convert("L")
     image.save(UPLOAD_FOLDER + "/" + "expected_grey.png")
     enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2)
+    #image = enhancer.enhance(1.5)
     image.save(UPLOAD_FOLDER + "/" + "expected_big.png")
     
     data = numpy.asarray(image)
@@ -32,14 +32,43 @@ def launchServer(args):
     # start expmt.
     new_h = h
     new_w = w
-    if h * w > 65536:
-        if w > h:
-            # w must be constrained
-            new_w = 256
-            new_h = int(new_w * (h / w))
+    target = 66536
+    if h * w > target:
+
+        aspect = w / h
+
+        if aspect > 1:
+            low = 0
+            high = 384
+            new_w = 0
+            while low <= high:
+                mid = int((low + high) / 2)
+                new_h = int(mid / aspect)
+                
+                new_size = mid * new_h
+                
+                if new_size < target:
+                    new_w = mid
+                    low = mid + 1
+                else:
+                    high = mid - 1
+            new_h = int(new_w / aspect)
         else:
-            new_h = 256
-            new_w = int(new_h * (w / h))
+            low = 0
+            high = h
+            new_h = 0
+            while low <= high:
+                mid = int((low + high) / 2)
+                new_w = int(mid * aspect)
+                
+                new_size = mid * new_w
+                
+                if new_size < target:
+                    new_h = mid
+                    low = mid + 1
+                else:
+                    high = mid - 1
+            new_w = int(new_h * aspect)
         
         image = image.resize((new_w, new_h), Image.LANCZOS)
         image.save(UPLOAD_FOLDER + "/" + "expected_small.png")

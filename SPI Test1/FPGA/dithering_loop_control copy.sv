@@ -6,7 +6,7 @@ module dithering_loop_control2
 	parameter IMAGEY = 256,
 	parameter IMAGEX = 256,
 	parameter IMAGE_SIZE = IMAGEY * IMAGEX,
-	parameter IMAGEYlog2 = $clog2(IMAGEY), 
+	parameter IMAGEYlog2 = $clog2(IMAGEY),
 	parameter IMAGEXlog2 = $clog2(IMAGEX),
 	parameter IMAGE_ADDR_WIDTH = $clog2(IMAGE_SIZE),
 	parameter RGB_SIZE = 8,
